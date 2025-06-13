@@ -1,23 +1,62 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Post,
+  Req,
+  Res,
+  Session,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  login(@Body() dto: AuthDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: AuthDto,
+    @Session() session: Record<string, unknown>,
+  ) {
+    const user = await this.authService.login(dto);
+    if (!user) {
+      throw new UnauthorizedException('Credentials are incorrect');
+    }
+    session.user = user;
+    return user;
   }
 
   @Post('signup')
-  signup(@Body() dto: AuthDto) {
-    return this.authService.signup(dto);
+  async signup(
+    @Body() dto: AuthDto,
+    @Session() session: Record<string, unknown>,
+  ) {
+    const user = await this.authService.signup(dto);
+    if (!user) {
+      throw new UnauthorizedException('Credentials are incorrect');
+    }
+    session.user = user;
+    return user;
   }
 
   @Get('logout')
-  logout() {
-    return this.authService.logout();
+  @UseGuards(AuthGuard)
+  logout(@Req() req: Request, @Res() res: Response) {
+    req.session.destroy((err) => {
+      if (err) {
+        throw InternalServerErrorException;
+      }
+    });
+
+    return res
+      .clearCookie('connect.sid')
+      .status(200)
+      .json({ message: 'You have been logged out' });
   }
 }

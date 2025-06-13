@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Session } from '@nestjs/common';
 import { AuthDto } from './dto';
 import * as argon from 'argon2';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,25 +12,25 @@ export class AuthService {
   async login(dto: AuthDto) {
     const user = await this.userModel.findOne({ login: dto.login });
     if (!user) {
-      return new NotFoundException('No such user');
+      return null;
     }
     const isMatch = await argon.verify(user.password, dto.password);
     if (!isMatch) {
-      return new ForbiddenException('Credentials are incorrect');
+      return null;
     }
     return user;
   }
 
-  async signup(dto: AuthDto): Promise<User> {
+  async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password);
-    const user = new this.userModel({
+    const user = await new this.userModel({
       login: dto.login,
       password: hash,
-    });
-    return user.save();
-  }
+    }).save();
 
-  logout() {
-    return 'logout';
+    if (!user) {
+      return null;
+    }
+    return user;
   }
 }

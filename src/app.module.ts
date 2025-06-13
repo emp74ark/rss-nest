@@ -4,11 +4,14 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot('mongodb://rss-db/rss'), // TODO: get from dotenv
-    UserModule, AuthModule,
+    UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
