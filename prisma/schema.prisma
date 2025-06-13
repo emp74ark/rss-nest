@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DB_HOST")
+}
+
+model User {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  login         String         @unique
+  password      String
+  subscriptions Subscription[]
+  createdAt     DateTime       @default(now())
+  modifiedAt    DateTime       @updatedAt
+
+  @@map("users")
+}
+
+model Article {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  creator        String
+  pubDate        String
+  content        String
+  contentSnippet String
+  guid           String
+  categories     String[]
+  isoDate        DateTime
+  tags           String[]
+  read           Boolean      @default(false)
+  fullText       String
+  subscriptionId String       @db.ObjectId
+  subscribtion   Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@map("articles")
+}
+
+type SubscriptionSettings {
+  enabled      Boolean @default(true)
+  loadFullText Boolean @default(false)
+}
+
+model Subscription {
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  link        String
+  articles    Article[]
+  lastUpdate  DateTime
+  settings    SubscriptionSettings
+  createdAt   DateTime             @default(now())
+  modifiedAt  DateTime             @updatedAt
+  userId      String               @db.ObjectId
+  user        User                 @relation(fields: [userId], references: [id])
+
+  @@map("subscriptions")
+}
