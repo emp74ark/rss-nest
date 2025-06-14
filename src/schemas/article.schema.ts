@@ -43,3 +43,8 @@ export class Article {
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
+
+ArticleSchema.pre('findOneAndUpdate', function (next) {
+  this.set({ modifiedAt: new Date() });
+  next();
+});

@@ -44,3 +44,8 @@ export class SourceSubscription {
 
 export const SubscriptionSchema =
   SchemaFactory.createForClass(SourceSubscription);
+
+SubscriptionSchema.pre('findOneAndUpdate', function (next) {
+  this.set({ modifiedAt: new Date() });
+  next();
+});

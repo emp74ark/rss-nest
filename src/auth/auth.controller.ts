@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   InternalServerErrorException,
   Post,
   Req,
@@ -19,6 +21,7 @@ import { AuthGuard } from './auth.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
     @Body() dto: AuthDto,
@@ -28,8 +31,12 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('Credentials are incorrect');
     }
-    session.user = user;
-    return user;
+
+    const userObject = user.toObject();
+    Reflect.deleteProperty(userObject, 'password');
+    session.user = userObject;
+
+    return userObject;
   }
 
   @Post('signup')
@@ -41,8 +48,12 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('Credentials are incorrect');
     }
-    session.user = user;
-    return user;
+
+    const userObject = user.toObject();
+    Reflect.deleteProperty(userObject, 'password');
+    session.user = userObject;
+
+    return userObject;
   }
 
   @Get('logout')
