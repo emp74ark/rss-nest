@@ -16,7 +16,11 @@ export class User {
   @Prop({ default: Role.User })
   role: Role;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' })
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Subscription',
+    default: [],
+  })
   subscriptions: SourceSubscription[];
 
   @Prop({ default: Date.now })

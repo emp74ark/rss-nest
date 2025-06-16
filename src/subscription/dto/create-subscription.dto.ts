@@ -1,5 +1,4 @@
 import {
-  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -8,10 +7,6 @@ import {
 import { SubscriptionSettings } from '../entities/subscription.entity';
 
 export class CreateSubscriptionDto {
-  @IsMongoId()
-  @IsNotEmpty()
-  userId: string;
-
   @IsString()
   @IsNotEmpty()
   title: string;
@@ -25,5 +20,6 @@ export class CreateSubscriptionDto {
   link: string;
 
   @ValidateNested()
-  settings: SubscriptionSettings;
+  @IsOptional()
+  settings?: SubscriptionSettings;
 }

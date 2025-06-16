@@ -29,7 +29,7 @@ export class SourceSubscription {
   @Prop({ required: true })
   link: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Article' })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Article', default: [] })
   articles: Article[];
 
   @Prop()

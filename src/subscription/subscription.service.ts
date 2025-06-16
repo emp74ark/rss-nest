@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { SourceSubscription } from '../schemas/subscription.schema';
 
 @Injectable()
 export class SubscriptionService {
-  create(createSubscriptionDto: CreateSubscriptionDto) {
-    return 'This action adds a new subscription';
+  constructor(
+    @InjectModel('Subscription')
+    private subscriptionModel: Model<SourceSubscription>,
+  ) {}
+
+  async create({
+    createSubscriptionDto,
+    userId,
+  }: {
+    createSubscriptionDto: CreateSubscriptionDto;
+    userId?: string;
+  }) {
+    return this.subscriptionModel.create({
+      ...createSubscriptionDto,
+      userId: userId,
+    });
   }
 
-  findAll() {
-    return `This action returns all subscription`;
+  async findAll({ userId }: { userId?: string }) {
+    return await this.subscriptionModel.find({ userId: userId }).exec();
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} subscription`;
+  async findOne(id: string) {
+    const subscription = await this.subscriptionModel
+      .findOne({ _id: id })
+      .exec();
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+    return subscription;
   }
 
-  update(id: string, updateSubscriptionDto: UpdateSubscriptionDto) {
-    return `This action updates a #${id} subscription`;
+  async update(id: string, updateSubscriptionDto: UpdateSubscriptionDto) {
+    const subscription = await this.subscriptionModel
+      .findByIdAndUpdate(id, updateSubscriptionDto, { new: true })
+      .exec();
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+    return subscription;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} subscription`;
+  async remove(id: string) {
+    return this.subscriptionModel.findByIdAndDelete(id).exec();
   }
 }
