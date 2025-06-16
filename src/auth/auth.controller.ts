@@ -15,7 +15,7 @@ import {
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
-import { AuthGuard } from './auth.guard';
+import { SessionGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
@@ -57,7 +57,7 @@ export class AuthController {
   }
 
   @Get('logout')
-  @UseGuards(AuthGuard)
+  @UseGuards(SessionGuard)
   logout(@Req() req: Request, @Res() res: Response) {
     req.session.destroy((err) => {
       if (err) {

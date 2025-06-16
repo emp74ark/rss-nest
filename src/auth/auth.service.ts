@@ -28,7 +28,7 @@ export class AuthService {
   async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password);
     const user = await new this.userModel({
-      login: dto.login,
+      ...dto,
       password: hash,
     }).save();
 
