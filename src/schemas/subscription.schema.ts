@@ -17,6 +17,9 @@ export type SubscriptionDocument = HydratedDocument<SourceSubscription>;
 
 @Schema()
 export class SourceSubscription {
+  @Prop({ type: mongoose.Schema.ObjectId, ref: 'User', required: true })
+  userId: string;
+
   @Prop({ required: true })
   title: string;
 
