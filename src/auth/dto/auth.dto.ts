@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Role } from '../../shared/enums';
+import { Role } from '../../shared/entities';
 
 export class AuthDto {
   @IsString()

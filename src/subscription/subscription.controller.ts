@@ -55,4 +55,15 @@ export class SubscriptionController {
   remove(@Param('id') id: string) {
     return this.subscriptionService.remove(id);
   }
+
+  @Get(':id/refresh')
+  refresh(
+    @Param('id') id: string,
+    @Session() session: { user?: User & { _id: string } },
+  ) {
+    return this.subscriptionService.refresh({
+      subscriptionId: id,
+      userId: session.user?._id,
+    });
+  }
 }

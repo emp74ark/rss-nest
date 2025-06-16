@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { Request } from 'express';
-import { Role } from '../../shared/enums';
+import { Role } from '../../shared/entities';
 import { RequiredRole } from '../decorators';
 import { User } from '../../schemas/user.schema';
 

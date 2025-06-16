@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
-import { SourceSubscription } from './subscription.schema';
-import { Role } from '../shared/enums';
+import { HydratedDocument } from 'mongoose';
+import { Role } from '../shared/entities';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -15,13 +14,6 @@ export class User {
 
   @Prop({ default: Role.User })
   role: Role;
-
-  @Prop({
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'Subscription',
-    default: [],
-  })
-  subscriptions: SourceSubscription[];
 
   @Prop({ default: Date.now })
   createdAt: Date;

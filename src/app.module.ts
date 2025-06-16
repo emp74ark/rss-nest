@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { SharedModule } from './shared/shared.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { ArticleModule } from './article/article.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     AuthModule,
     SharedModule,
     SubscriptionModule,
+    ArticleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

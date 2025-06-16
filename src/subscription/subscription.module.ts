@@ -3,6 +3,8 @@ import { SubscriptionService } from './subscription.service';
 import { SubscriptionController } from './subscription.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SubscriptionSchema } from '../schemas/subscription.schema';
+import { SharedModule } from '../shared/shared.module';
+import { ArticleModule } from '../article/article.module';
 
 @Module({
   controllers: [SubscriptionController],
@@ -14,6 +16,8 @@ import { SubscriptionSchema } from '../schemas/subscription.schema';
         schema: SubscriptionSchema,
       },
     ]),
+    SharedModule,
+    ArticleModule,
   ],
 })
 export class SubscriptionModule {}

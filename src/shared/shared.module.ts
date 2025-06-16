@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import { FeedParserService } from './feed-parser.service';
 
-@Module({})
+@Module({
+  imports: [],
+  providers: [FeedParserService],
+  exports: [FeedParserService],
+})
 export class SharedModule {}
