@@ -75,6 +75,7 @@ export class SubscriptionService {
   }
 
   async remove(id: string) {
+    await this.articleService.deleteMany({ subscriptionId: id });
     return this.subscriptionModel.findByIdAndDelete(id).exec();
   }
 

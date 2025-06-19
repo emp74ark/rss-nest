@@ -61,4 +61,8 @@ export class ArticleService {
     });
     return this.articleModel.insertMany(articles);
   }
+
+  deleteMany({ subscriptionId }: { subscriptionId?: string }) {
+    return this.articleModel.deleteMany({ subscriptionId: subscriptionId });
+  }
 }
