@@ -9,6 +9,8 @@ import {
   Param,
   Patch,
   Post,
+  Session,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -17,6 +19,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleGuard, SessionGuard } from '../auth/guards';
 import { Role } from '../shared/entities';
 import { RequiredRole } from '../auth/decorators';
+import { User } from '../schemas/user.schema';
 
 @Controller('user')
 export class UserController {
@@ -32,6 +35,20 @@ export class UserController {
   @RequiredRole(Role.Admin)
   findAll() {
     return this.userService.findAll();
+  }
+
+  @UseGuards(SessionGuard)
+  @Get('/self')
+  @RequiredRole(Role.User)
+  async findSelf(@Session() session: { user?: User & { _id: string } }) {
+    if (!session.user?._id) {
+      throw new UnauthorizedException();
+    }
+    const user = await this.userService.findOne(session.user?._id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   @UseGuards(SessionGuard)
