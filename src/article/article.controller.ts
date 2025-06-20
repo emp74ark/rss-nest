@@ -11,6 +11,8 @@ import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { SessionUserId } from '../auth/decorators';
+import { GetPaginationArgs } from '../shared/decorators';
+import { Pagination } from '../shared/entities';
 
 @Controller('article')
 export class ArticleController {
@@ -22,8 +24,14 @@ export class ArticleController {
   }
 
   @Get()
-  findAll(@SessionUserId() sessionUserId: string) {
-    return this.articleService.findAllByUser({ userId: sessionUserId });
+  findAll(
+    @SessionUserId() sessionUserId: string,
+    @GetPaginationArgs() paginationArgs: Pagination,
+  ) {
+    return this.articleService.findAllByUser({
+      userId: sessionUserId,
+      pagination: paginationArgs,
+    });
   }
 
   @Get(':id')

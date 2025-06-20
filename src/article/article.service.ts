@@ -4,6 +4,7 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Article } from '../schemas/article.schema';
+import { Paginated, Pagination } from '../shared/entities';
 
 @Injectable()
 export class ArticleService {
@@ -13,8 +14,40 @@ export class ArticleService {
     return this.articleModel.create(createArticleDto);
   }
 
-  findAllByUser({ userId }: { userId?: string }) {
-    return this.articleModel.find({ userId: userId }).exec();
+  async findAllByUser({
+    userId,
+    pagination,
+  }: {
+    userId?: string;
+    pagination: Pagination;
+  }): Promise<Paginated<Article>> {
+    const result: Paginated<Article>[] = await this.articleModel.aggregate([
+      { $match: { userId: userId } },
+      {
+        $facet: {
+          count: [{ $count: 'total' }],
+          current: [
+            { $skip: (pagination.pageNumber - 1) * pagination.perPage },
+            { $limit: pagination.perPage },
+          ],
+        },
+      },
+      {
+        $project: {
+          total: { $ifNull: [{ $arrayElemAt: ['$count.total', 0] }, 0] },
+          result: '$current',
+        },
+      },
+    ]);
+
+    if (result.length === 0) {
+      return {
+        total: 0,
+        result: [],
+      };
+    }
+
+    return result[0];
   }
 
   findAllBySubscription({
