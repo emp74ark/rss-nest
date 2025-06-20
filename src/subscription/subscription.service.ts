@@ -11,6 +11,7 @@ import { SourceSubscription } from '../schemas/subscription.schema';
 import { FeedParserService } from '../shared/feed-parser.service';
 import { ArticleService } from '../article/article.service';
 import { CreateArticleDto } from '../article/dto/create-article.dto';
+import { Paginated, Pagination } from '../shared/entities';
 
 @Injectable()
 export class SubscriptionService {
@@ -50,8 +51,43 @@ export class SubscriptionService {
     });
   }
 
-  async findAll({ userId }: { userId?: string }) {
-    return await this.subscriptionModel.find({ userId: userId }).exec();
+  async findAll({
+    userId,
+    pagination,
+  }: {
+    userId?: string;
+    pagination: Pagination;
+  }): Promise<Paginated<SourceSubscription>> {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const result: Paginated<SourceSubscription>[] =
+      await this.subscriptionModel.aggregate([
+        { $match: { userId: userObjectId } },
+        {
+          $facet: {
+            count: [{ $count: 'total' }],
+            current: [
+              { $skip: (pagination.pageNumber - 1) * pagination.perPage },
+              { $limit: pagination.perPage },
+            ],
+          },
+        },
+        {
+          $project: {
+            total: { $ifNull: [{ $arrayElemAt: ['$count.total', 0] }, 0] },
+            result: '$current',
+          },
+        },
+      ]);
+
+    if (result.length === 0) {
+      return {
+        total: 0,
+        result: [],
+      };
+    }
+
+    return result[0];
   }
 
   async findOne(id: string) {

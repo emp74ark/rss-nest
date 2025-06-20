@@ -13,6 +13,8 @@ import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { SessionGuard } from '../auth/guards';
 import { SessionUserId } from '../auth/decorators';
+import { GetPaginationArgs } from '../shared/decorators';
+import { Pagination } from '../shared/entities';
 
 @UseGuards(SessionGuard)
 @Controller('subscription')
@@ -31,8 +33,14 @@ export class SubscriptionController {
   }
 
   @Get()
-  findAll(@SessionUserId() sessionUserId: string) {
-    return this.subscriptionService.findAll({ userId: sessionUserId });
+  findAll(
+    @SessionUserId() sessionUserId: string,
+    @GetPaginationArgs() paginationArgs: Pagination,
+  ) {
+    return this.subscriptionService.findAll({
+      userId: sessionUserId,
+      pagination: paginationArgs,
+    });
   }
 
   @Get(':id')
