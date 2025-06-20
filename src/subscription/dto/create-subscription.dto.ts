@@ -1,7 +1,7 @@
 import {
   IsNotEmpty,
   IsOptional,
-  IsString,
+  IsString, IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { SubscriptionSettings } from '../entities/subscription.entity';
@@ -17,6 +17,7 @@ export class CreateSubscriptionDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsUrl()
   link: string;
 
   @ValidateNested()

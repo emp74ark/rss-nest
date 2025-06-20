@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
-  Session,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
+import { SessionUserId } from '../auth/decorators';
+import { GetPaginationArgs } from '../shared/decorators';
+import { Pagination } from '../shared/entities';
 
 @Controller('article')
 export class ArticleController {
@@ -22,8 +24,14 @@ export class ArticleController {
   }
 
   @Get()
-  findAll(@Session() session: { user?: { _id?: string } }) {
-    return this.articleService.findAllByUser({ userId: session.user?._id });
+  findAll(
+    @SessionUserId() sessionUserId: string,
+    @GetPaginationArgs() paginationArgs: Pagination,
+  ) {
+    return this.articleService.findAllByUser({
+      userId: sessionUserId,
+      pagination: paginationArgs,
+    });
   }
 
   @Get(':id')

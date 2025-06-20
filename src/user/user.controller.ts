@@ -9,17 +9,15 @@ import {
   Param,
   Patch,
   Post,
-  Session,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleGuard, SessionGuard } from '../auth/guards';
-import { Role } from '../shared/entities';
-import { RequiredRole } from '../auth/decorators';
-import { User } from '../schemas/user.schema';
+import { Pagination, Role } from '../shared/entities';
+import { RequiredRole, SessionUserId } from '../auth/decorators';
+import { GetPaginationArgs } from '../shared/decorators';
 
 @Controller('user')
 export class UserController {
@@ -33,18 +31,15 @@ export class UserController {
   @UseGuards(SessionGuard, RoleGuard)
   @Get()
   @RequiredRole(Role.Admin)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@GetPaginationArgs() paginationArgs: Pagination) {
+    return this.userService.findAll({ pagination: paginationArgs });
   }
 
   @UseGuards(SessionGuard)
   @Get('/self')
   @RequiredRole(Role.User)
-  async findSelf(@Session() session: { user?: User & { _id: string } }) {
-    if (!session.user?._id) {
-      throw new UnauthorizedException();
-    }
-    const user = await this.userService.findOne(session.user?._id);
+  async findSelf(@SessionUserId() sessionUserId: string) {
+    const user = await this.userService.findOne(sessionUserId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
