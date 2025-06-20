@@ -17,12 +17,28 @@ export class ArticleService {
   async findAllByUser({
     userId,
     pagination,
+    read,
+    tags,
   }: {
     userId?: string;
     pagination: Pagination;
+    read?: 'true' | 'false';
+    tags?: string[];
   }): Promise<Paginated<Article>> {
+    const query = {
+      userId: userId,
+    };
+
+    if (read) {
+      query['read'] = read === 'true';
+    }
+
+    if (tags?.length) {
+      query['tags'] = { $in: tags };
+    }
+
     const result: Paginated<Article>[] = await this.articleModel.aggregate([
-      { $match: { userId: userId } },
+      { $match: query },
       {
         $facet: {
           count: [{ $count: 'total' }],

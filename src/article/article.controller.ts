@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseArrayPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -27,10 +29,15 @@ export class ArticleController {
   findAll(
     @SessionUserId() sessionUserId: string,
     @GetPaginationArgs() paginationArgs: Pagination,
+    @Query('read') read?: 'true' | 'false',
+    @Query('tags', new ParseArrayPipe({ optional: true, items: String }))
+    tags?: string[],
   ) {
     return this.articleService.findAllByUser({
       userId: sessionUserId,
       pagination: paginationArgs,
+      read,
+      tags,
     });
   }
 
