@@ -6,14 +6,13 @@ import {
   Param,
   Patch,
   Post,
-  Session,
   UseGuards,
 } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { SessionGuard } from '../auth/guards';
-import { User } from '../schemas/user.schema';
+import { SessionUserId } from '../auth/decorators';
 
 @UseGuards(SessionGuard)
 @Controller('subscription')
@@ -23,19 +22,17 @@ export class SubscriptionController {
   @Post()
   create(
     @Body() createSubscriptionDto: CreateSubscriptionDto,
-    @Session() session: { user?: User & { _id: string } },
+    @SessionUserId() sessionUserId: string,
   ) {
-    // TODO: get user ID via decorator
     return this.subscriptionService.create({
       createSubscriptionDto,
-      userId: session.user?._id,
+      userId: sessionUserId,
     });
   }
 
   @Get()
-  findAll(@Session() session: { user?: User & { _id: string } }) {
-    // TODO: get user ID via decorator
-    return this.subscriptionService.findAll({ userId: session.user?._id });
+  findAll(@SessionUserId() sessionUserId: string) {
+    return this.subscriptionService.findAll({ userId: sessionUserId });
   }
 
   @Get(':id')
@@ -57,13 +54,10 @@ export class SubscriptionController {
   }
 
   @Get(':id/refresh')
-  refresh(
-    @Param('id') id: string,
-    @Session() session: { user?: User & { _id: string } },
-  ) {
+  refresh(@Param('id') id: string, @SessionUserId() sessionUserId: string) {
     return this.subscriptionService.refresh({
       subscriptionId: id,
-      userId: session.user?._id,
+      userId: sessionUserId,
     });
   }
 }
