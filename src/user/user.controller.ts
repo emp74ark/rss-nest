@@ -15,8 +15,9 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleGuard, SessionGuard } from '../auth/guards';
-import { Role } from '../shared/entities';
+import { Pagination, Role } from '../shared/entities';
 import { RequiredRole, SessionUserId } from '../auth/decorators';
+import { GetPaginationArgs } from '../shared/decorators';
 
 @Controller('user')
 export class UserController {
@@ -30,8 +31,8 @@ export class UserController {
   @UseGuards(SessionGuard, RoleGuard)
   @Get()
   @RequiredRole(Role.Admin)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@GetPaginationArgs() paginationArgs: Pagination) {
+    return this.userService.findAll({ pagination: paginationArgs });
   }
 
   @UseGuards(SessionGuard)

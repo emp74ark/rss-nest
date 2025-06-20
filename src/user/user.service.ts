@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { Model } from 'mongoose';
+import { Paginated, Pagination } from '../shared/entities';
 
 @Injectable()
 export class UserService {
@@ -13,8 +14,41 @@ export class UserService {
     return this.userModel.create(createUserDto);
   }
 
-  findAll(): Promise<User[]> {
-    return this.userModel.find();
+  async findAll({
+    pagination,
+  }: {
+    pagination: Pagination;
+  }): Promise<Paginated<User>> {
+    const result: Paginated<User>[] = await this.userModel.aggregate([
+      {
+        $facet: {
+          count: [{ $count: 'total' }],
+          current: [
+            {
+              $skip: (pagination.pageNumber - 1) * pagination.perPage,
+            },
+            {
+              $limit: pagination.perPage,
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          total: { $ifNull: [{ $arrayElemAt: ['$count.total', 0] }, 0] },
+          result: '$current',
+        },
+      },
+    ]);
+
+    if (result.length === 0) {
+      return {
+        total: 0,
+        result: [],
+      };
+    }
+
+    return result[0];
   }
 
   findOne(id: string) {
