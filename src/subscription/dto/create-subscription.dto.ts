@@ -1,7 +1,8 @@
 import {
   IsNotEmpty,
   IsOptional,
-  IsString, IsUrl,
+  IsString,
+  IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { SubscriptionSettings } from '../entities/subscription.entity';
