@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,11 +7,28 @@ import { Tag } from '../schemas/tags.schema';
 import { Paginated, Pagination } from '../shared/entities';
 
 @Injectable()
-export class TagService {
+export class TagService implements OnModuleInit {
   constructor(
     @InjectModel('Tag')
     private tagModel: Model<Tag>,
   ) {}
+
+  async onModuleInit() {
+    await this.createFav();
+  }
+
+  async createFav() {
+    const existing = await this.tagModel.findOne({
+      userId: 'all',
+      name: 'fav',
+    });
+    if (!existing) {
+      await this.tagModel.create({
+        userId: 'all',
+        name: 'fav',
+      });
+    }
+  }
 
   create({
     userId,
@@ -20,13 +37,10 @@ export class TagService {
     userId: string;
     createTagDto: CreateTagDto;
   }) {
-    return this.tagModel.create(
-      {
-        userId: userId,
-        ...createTagDto,
-      },
-      { new: true },
-    );
+    return this.tagModel.create({
+      userId: userId,
+      ...createTagDto,
+    });
   }
 
   async findAll({
@@ -37,7 +51,7 @@ export class TagService {
     pagination: Pagination;
   }) {
     const result: Paginated<Tag>[] = await this.tagModel.aggregate([
-      { $match: { userId: userId } },
+      { $match: { userId: { $in: [userId, 'all'] } } },
       {
         $facet: {
           count: [{ $count: 'total' }],
