@@ -10,6 +10,17 @@ export class Tag {
 
   @Prop({ unique: true })
   name: string;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+
+  @Prop({ default: Date.now })
+  modifiedAt: Date;
 }
 
 export const TagSchema = SchemaFactory.createForClass(Tag);
+
+TagSchema.pre('findOneAndUpdate', function (next) {
+  this.set({ modifiedAt: new Date() });
+  next();
+});

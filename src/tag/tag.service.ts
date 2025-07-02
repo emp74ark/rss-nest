@@ -4,6 +4,7 @@ import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Tag } from '../schemas/tags.schema';
+import { Paginated, Pagination } from '../shared/entities';
 
 @Injectable()
 export class TagService {
@@ -28,8 +29,40 @@ export class TagService {
     );
   }
 
-  findAll({ userId }: { userId: string }) {
-    return this.tagModel.find({ userId: userId });
+  async findAll({
+    userId,
+    pagination,
+  }: {
+    userId: string;
+    pagination: Pagination;
+  }) {
+    const result: Paginated<Tag>[] = await this.tagModel.aggregate([
+      { $match: { userId: userId } },
+      {
+        $facet: {
+          count: [{ $count: 'total' }],
+          current: [
+            { $skip: (pagination.pageNumber - 1) * pagination.perPage },
+            { $limit: pagination.perPage },
+          ],
+        },
+      },
+      {
+        $project: {
+          total: { $ifNull: [{ $arrayElemAt: ['$count.total', 0] }, 0] },
+          result: '$current',
+        },
+      },
+    ]);
+
+    if (result.length === 0) {
+      return {
+        total: 0,
+        result: [],
+      };
+    }
+
+    return result[0];
   }
 
   findOne({ userId, tagName }: { userId: string; tagName: string }) {

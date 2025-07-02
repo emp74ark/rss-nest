@@ -13,6 +13,8 @@ import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { SessionUserId } from '../auth/decorators';
 import { SessionGuard } from '../auth/guards';
+import { GetPaginationArgs } from '../shared/decorators';
+import { Pagination } from '../shared/entities';
 
 @UseGuards(SessionGuard)
 @Controller('tag')
@@ -28,8 +30,14 @@ export class TagController {
   }
 
   @Get()
-  findAll(@SessionUserId() sessionUserId: string) {
-    return this.tagService.findAll({ userId: sessionUserId });
+  findAll(
+    @SessionUserId() sessionUserId: string,
+    @GetPaginationArgs() paginationArgs: Pagination,
+  ) {
+    return this.tagService.findAll({
+      userId: sessionUserId,
+      pagination: paginationArgs,
+    });
   }
 
   @Get(':name')
