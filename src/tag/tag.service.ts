@@ -30,6 +30,10 @@ export class TagService implements OnModuleInit {
     }
   }
 
+  getDefaultTags() {
+    return this.tagModel.find({ userId: 'all' });
+  }
+
   create({
     userId,
     createTagDto,

@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
@@ -33,7 +35,12 @@ export class TagController {
   findAll(
     @SessionUserId() sessionUserId: string,
     @GetPaginationArgs() paginationArgs: Pagination,
+    @Query('default', new ParseBoolPipe({ optional: true }))
+    defaultTags: boolean = false,
   ) {
+    if (defaultTags) {
+      return this.tagService.getDefaultTags();
+    }
     return this.tagService.findAll({
       userId: sessionUserId,
       pagination: paginationArgs,
