@@ -38,7 +38,7 @@ export class Article {
   @Prop({ required: true })
   isoDate: Date;
 
-  @Prop()
+  @Prop({ type: [mongoose.Types.ObjectId], ref: 'tags', default: [] })
   tags: string[];
 
   @Prop({ default: false })
