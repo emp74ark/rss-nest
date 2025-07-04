@@ -1,4 +1,9 @@
-import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+} from '@nestjs/common';
 import { MongoServerError } from 'mongodb';
 import { Response } from 'express';
 
@@ -12,8 +17,10 @@ export class MongooseExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response: Response = ctx.getResponse();
     if (exception.code === MongoErrorCode.DUPLICATE_KEY) {
-      response.status(409).json({
+      response.status(HttpStatus.CONFLICT).json({
         message: 'Duplicate key',
+        error: 'Conflict',
+        statusCode: HttpStatus.CONFLICT,
       });
     }
   }
