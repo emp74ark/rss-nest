@@ -11,16 +11,20 @@ import {
   Session,
   UnauthorizedException,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { SessionGuard } from './guards';
+import { AuthLogInterceptor } from './interceptors/auth-log.interceptor';
+import { AuthResponseMessage } from './enums';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseInterceptors(AuthLogInterceptor)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
@@ -29,7 +33,9 @@ export class AuthController {
   ) {
     const user = await this.authService.login(dto);
     if (!user) {
-      throw new UnauthorizedException('Credentials are incorrect');
+      throw new UnauthorizedException(
+        AuthResponseMessage.INCORRECT_CREDENTIALS,
+      );
     }
 
     const userObject = user.toObject();
@@ -39,6 +45,7 @@ export class AuthController {
     return userObject;
   }
 
+  @UseInterceptors(AuthLogInterceptor)
   @Post('signup')
   async signup(
     @Body() dto: AuthDto,
@@ -46,7 +53,9 @@ export class AuthController {
   ) {
     const user = await this.authService.signup(dto);
     if (!user) {
-      throw new UnauthorizedException('Credentials are incorrect');
+      throw new UnauthorizedException(
+        AuthResponseMessage.INCORRECT_CREDENTIALS,
+      );
     }
 
     const userObject = user.toObject();
@@ -67,7 +76,7 @@ export class AuthController {
 
     return res
       .clearCookie('connect.sid')
-      .status(200)
-      .json({ message: 'You have been logged out' });
+      .status(HttpStatus.OK)
+      .json({ message: AuthResponseMessage.LOGGED_OUT });
   }
 }
