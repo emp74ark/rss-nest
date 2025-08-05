@@ -17,6 +17,9 @@ export type SubscriptionDocument = HydratedDocument<SourceSubscription>;
 
 @Schema()
 export class SourceSubscription {
+  @Prop({ type: mongoose.Schema.ObjectId, ref: 'users', required: true })
+  userId: string;
+
   @Prop({ required: true })
   title: string;
 
@@ -26,7 +29,11 @@ export class SourceSubscription {
   @Prop({ required: true })
   link: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Article' })
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'articles',
+    default: [],
+  })
   articles: Article[];
 
   @Prop()
@@ -44,3 +51,8 @@ export class SourceSubscription {
 
 export const SubscriptionSchema =
   SchemaFactory.createForClass(SourceSubscription);
+
+SubscriptionSchema.pre('findOneAndUpdate', function (next) {
+  this.set({ modifiedAt: new Date() });
+  next();
+});

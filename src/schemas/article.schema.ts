@@ -1,10 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 export type ArticleDocument = HydratedDocument<Article>;
 
 @Schema()
 export class Article {
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'users' })
+  userId: string;
+
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'subscriptions' })
+  subscriptionId: string;
+
   @Prop({ required: true })
   title: string;
 
@@ -32,7 +38,7 @@ export class Article {
   @Prop({ required: true })
   isoDate: Date;
 
-  @Prop()
+  @Prop({ type: [mongoose.Types.ObjectId], ref: 'tags', default: [] })
   tags: string[];
 
   @Prop({ default: false })
@@ -43,3 +49,8 @@ export class Article {
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
+
+ArticleSchema.pre('findOneAndUpdate', function (next) {
+  this.set({ modifiedAt: new Date() });
+  next();
+});

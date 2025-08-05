@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   InternalServerErrorException,
   Post,
   Req,
@@ -9,16 +11,21 @@ import {
   Session,
   UnauthorizedException,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
-import { AuthGuard } from './auth.guard';
+import { SessionGuard } from './guards';
+import { AuthLogInterceptor } from './interceptors/auth-log.interceptor';
+import { AuthResponseMessage } from './enums';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseInterceptors(AuthLogInterceptor)
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
     @Body() dto: AuthDto,
@@ -26,12 +33,19 @@ export class AuthController {
   ) {
     const user = await this.authService.login(dto);
     if (!user) {
-      throw new UnauthorizedException('Credentials are incorrect');
+      throw new UnauthorizedException(
+        AuthResponseMessage.INCORRECT_CREDENTIALS,
+      );
     }
-    session.user = user;
-    return user;
+
+    const userObject = user.toObject();
+    Reflect.deleteProperty(userObject, 'password');
+    session.user = userObject;
+
+    return userObject;
   }
 
+  @UseInterceptors(AuthLogInterceptor)
   @Post('signup')
   async signup(
     @Body() dto: AuthDto,
@@ -39,14 +53,20 @@ export class AuthController {
   ) {
     const user = await this.authService.signup(dto);
     if (!user) {
-      throw new UnauthorizedException('Credentials are incorrect');
+      throw new UnauthorizedException(
+        AuthResponseMessage.INCORRECT_CREDENTIALS,
+      );
     }
-    session.user = user;
-    return user;
+
+    const userObject = user.toObject();
+    Reflect.deleteProperty(userObject, 'password');
+    session.user = userObject;
+
+    return userObject;
   }
 
   @Get('logout')
-  @UseGuards(AuthGuard)
+  @UseGuards(SessionGuard)
   logout(@Req() req: Request, @Res() res: Response) {
     req.session.destroy((err) => {
       if (err) {
@@ -56,7 +76,7 @@ export class AuthController {
 
     return res
       .clearCookie('connect.sid')
-      .status(200)
-      .json({ message: 'You have been logged out' });
+      .status(HttpStatus.OK)
+      .json({ message: AuthResponseMessage.LOGGED_OUT });
   }
 }

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
-import { SourceSubscription } from './subscription.schema';
+import { HydratedDocument } from 'mongoose';
+import { Role } from '../shared/entities';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -9,11 +9,11 @@ export class User {
   @Prop({ required: true, unique: true })
   login: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, select: false })
   password: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' })
-  subscriptions: SourceSubscription[];
+  @Prop({ default: Role.User })
+  role: Role;
 
   @Prop({ default: Date.now })
   createdAt: Date;
@@ -23,3 +23,8 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.pre('findOneAndUpdate', function (next) {
+  this.set({ modifiedAt: new Date() });
+  next();
+});

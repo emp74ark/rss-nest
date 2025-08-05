@@ -2,8 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from 'node:process';
 import * as dotenv from 'dotenv';
-import * as session from 'express-session';
+import session from 'express-session';
 import { ValidationPipe } from '@nestjs/common';
+import { MongooseExceptionFilter } from './filters/mongoose-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,6 +28,13 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  app.useGlobalFilters(new MongooseExceptionFilter());
+
+  app.enableCors({
+    origin: ['http://localhost:4200'],
+    credentials: true,
+  });
 
   await app.listen(process.env.PORT ?? 3600);
 }

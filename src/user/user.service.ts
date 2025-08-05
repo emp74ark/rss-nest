@@ -4,28 +4,64 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { Model } from 'mongoose';
+import { Paginated, Pagination } from '../shared/entities';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel('User') private userModel: Model<User>) {}
 
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    return this.userModel.create(createUserDto);
   }
 
-  findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+  async findAll({
+    pagination,
+  }: {
+    pagination: Pagination;
+  }): Promise<Paginated<User>> {
+    const result: Paginated<User>[] = await this.userModel.aggregate([
+      {
+        $facet: {
+          count: [{ $count: 'total' }],
+          current: [
+            {
+              $skip: (pagination.pageNumber - 1) * pagination.perPage,
+            },
+            {
+              $limit: pagination.perPage,
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          total: { $ifNull: [{ $arrayElemAt: ['$count.total', 0] }, 0] },
+          result: '$current',
+        },
+      },
+    ]);
+
+    if (result.length === 0) {
+      return {
+        total: 0,
+        result: [],
+      };
+    }
+
+    return result[0];
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(id: string) {
+    return this.userModel.findById(id);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: string, updateUserDto: UpdateUserDto) {
+    return this.userModel.findByIdAndUpdate(id, updateUserDto, {
+      new: true,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string) {
+    this.userModel.findByIdAndDelete(id);
   }
 }
