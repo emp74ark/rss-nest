@@ -8,10 +8,25 @@ export class FeedParserService {
     maxRedirects: 10,
   });
 
+  hasEncodedContent = (
+    rssItem: RssItem,
+  ): rssItem is RssItem & {
+    'content:encoded': string;
+    'content:encodedSnippet': string;
+  } => {
+    return Reflect.has(rssItem, 'content:encoded');
+  };
+
   parseRssFeed = async ({ link }: { link: string }) => {
     try {
       const { items } = await this.#rssParser.parseURL(link);
-      return items;
+      return items.map((item) => {
+        if (this.hasEncodedContent(item)) {
+          item.content = item['content:encoded'];
+          item.contentSnippet = item['content:encodedSnippet'];
+        }
+        return item;
+      });
     } catch (error) {
       console.error(error);
     }
