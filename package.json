@@ -1,10 +1,13 @@
 {
-  "name": "rss-nest",
+  "name": "@emp74ark/rss-nest",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Backend for RSS Feeds client",
+  "author": "emp74ark",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "ISC",
+  "publishConfig": {
+    "@emp74ark:registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
