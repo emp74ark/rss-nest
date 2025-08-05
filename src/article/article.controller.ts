@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseArrayPipe,
+  ParseBoolPipe,
   Patch,
   Post,
   Query,
@@ -48,7 +49,21 @@ export class ArticleController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
-    return this.articleService.update(id, updateArticleDto);
+    return this.articleService.updateOne(id, updateArticleDto);
+  }
+
+  @Patch()
+  updateMany(
+    @Body() updateArticleDto: UpdateArticleDto & { ids: string[] },
+    @Query('all', ParseBoolPipe) all: boolean,
+  ) {
+    if (all) {
+      return this.articleService.updateAll({ article: updateArticleDto });
+    }
+    return this.articleService.updateMany({
+      ids: updateArticleDto.ids,
+      article: updateArticleDto,
+    });
   }
 
   @Delete(':id')

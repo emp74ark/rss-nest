@@ -85,7 +85,7 @@ export class ArticleService {
     return this.articleModel.findById(id);
   }
 
-  update(id: string, updateArticleDto: UpdateArticleDto) {
+  updateOne(id: string, updateArticleDto: UpdateArticleDto) {
     return this.articleModel.findByIdAndUpdate(id, updateArticleDto, {
       new: true,
     });
@@ -109,6 +109,19 @@ export class ArticleService {
       Reflect.set(article, 'subscriptionId', subscriptionId);
     });
     return this.articleModel.insertMany(articles);
+  }
+
+  updateMany({ ids, article }: { ids: string[]; article: UpdateArticleDto }) {
+    return this.articleModel.updateMany(
+      {
+        _id: { $in: ids },
+      },
+      article,
+    );
+  }
+
+  updateAll({ article }: { article: UpdateArticleDto }) {
+    return this.articleModel.updateMany({}, article);
   }
 
   deleteMany({ subscriptionId }: { subscriptionId?: string }) {
