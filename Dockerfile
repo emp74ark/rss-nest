@@ -5,4 +5,5 @@ RUN npm install
 COPY . .
 RUN npm run build
 EXPOSE 3600
-CMD ["node", "node dist/main.js"]
+#CMD ["node", "node dist/main.js"]
+RUN npm run start:prod
