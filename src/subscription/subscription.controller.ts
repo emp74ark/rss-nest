@@ -43,6 +43,11 @@ export class SubscriptionController {
     });
   }
 
+  @Get('/refresh')
+  refreshAll(@SessionUserId() sessionUserId: string) {
+    return this.subscriptionService.refreshAll({ userId: sessionUserId });
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.subscriptionService.findOne(id);
@@ -62,8 +67,8 @@ export class SubscriptionController {
   }
 
   @Get(':id/refresh')
-  refresh(@Param('id') id: string, @SessionUserId() sessionUserId: string) {
-    return this.subscriptionService.refresh({
+  refreshOne(@Param('id') id: string, @SessionUserId() sessionUserId: string) {
+    return this.subscriptionService.refreshOne({
       subscriptionId: id,
       userId: sessionUserId,
     });

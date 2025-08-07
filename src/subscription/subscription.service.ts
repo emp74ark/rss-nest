@@ -115,7 +115,7 @@ export class SubscriptionService {
     return this.subscriptionModel.findByIdAndDelete(id).exec();
   }
 
-  async refresh({
+  async refreshOne({
     userId,
     subscriptionId,
   }: {
@@ -160,5 +160,23 @@ export class SubscriptionService {
     } else {
       return subscription;
     }
+  }
+
+  async refreshAll({ userId }: { userId: string }) {
+    const subscriptions = await this.subscriptionModel.find({ userId });
+
+    const promises = subscriptions.map((s) => {
+      return this.refreshOne({ userId, subscriptionId: s._id.toHexString() });
+    });
+
+    const result = await Promise.allSettled(promises);
+
+    return result
+      .map((r) => {
+        if (r.status === 'fulfilled') {
+          return r.value;
+        }
+      })
+      .filter(Boolean);
   }
 }
