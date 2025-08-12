@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Article } from '../schemas/article.schema';
 import { Paginated, Pagination } from '../shared/entities';
+import puppeteer from 'puppeteer';
+import { JSDOM } from 'jsdom';
+import { Readability } from '@mozilla/readability';
 
 @Injectable()
 export class ArticleService {
@@ -126,5 +129,41 @@ export class ArticleService {
 
   deleteMany({ subscriptionId }: { subscriptionId?: string }) {
     return this.articleModel.deleteMany({ subscriptionId: subscriptionId });
+  }
+
+  async getFullText({ id }: { id: string }) {
+    const article = await this.articleModel.findById(id);
+
+    if (!article) {
+      throw new NotFoundException('Article does not exist');
+    }
+
+    const link = article.link;
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    const page = await browser.newPage();
+    await page.goto(link, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const bodyHtml: string = await page.evaluate(() => document.body.innerHTML);
+    const document: Document = new JSDOM(bodyHtml).window.document;
+    const read = new Readability(document).parse();
+    await browser.close();
+
+    if (!read?.content) {
+      throw new NotFoundException('Could not fetch article content');
+    }
+
+    await this.articleModel.updateOne(
+      { _id: article._id },
+      { $set: { fullText: read.content } },
+    );
+
+    return { fullText: read?.content };
   }
 }

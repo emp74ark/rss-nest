@@ -55,5 +55,6 @@ export class CreateArticleDto {
   read?: boolean;
 
   @IsString()
+  @IsOptional()
   fullText?: string;
 }

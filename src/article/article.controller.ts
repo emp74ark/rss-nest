@@ -47,6 +47,11 @@ export class ArticleController {
     return this.articleService.findOne(id);
   }
 
+  @Get(':id/full')
+  fullText(@Param('id') id: string) {
+    return this.articleService.getFullText({ id });
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
     return this.articleService.updateOne(id, updateArticleDto);

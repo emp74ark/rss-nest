@@ -5,4 +5,5 @@ RUN npm install
 COPY . .
 RUN npm run build
 EXPOSE 3600
+RUN sh ./puppeteer.sh
 CMD ["node", "dist/main.js"]

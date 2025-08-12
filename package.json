@@ -23,6 +23,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -35,7 +36,9 @@
     "class-validator": "^0.14.2",
     "dotenv": "^16.5.0",
     "express-session": "^1.18.1",
+    "jsdom": "^26.1.0",
     "mongoose": "^8.15.1",
+    "puppeteer": "^24.16.1",
     "reflect-metadata": "^0.2.2",
     "rss-parser": "^3.13.0",
     "rxjs": "^7.8.1"
@@ -51,6 +54,7 @@
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.2",
     "@types/jest": "^29.5.14",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
