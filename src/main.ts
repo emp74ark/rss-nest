@@ -1,25 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as process from 'node:process';
-import * as dotenv from 'dotenv';
 import session from 'express-session';
 import { ValidationPipe } from '@nestjs/common';
 import { MongooseExceptionFilter } from './filters/mongoose-exception.filter';
+import { appConfig } from './config/dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  dotenv.config();
-
   app.use(
     session({
-      secret: process.env.AUTH_SECRET || 'secret',
+      secret: appConfig.secret,
       resave: false,
       saveUninitialized: false,
       cookie: {
         secure: false,
       },
-      name: 'connect.sid',
+      name: appConfig.cookieName,
     }),
   );
 
@@ -32,11 +29,11 @@ async function bootstrap() {
   app.useGlobalFilters(new MongooseExceptionFilter());
 
   app.enableCors({
-    origin: ['http://localhost:4200'],
+    origin: [appConfig.webClient],
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 3600);
+  await app.listen(appConfig.port);
 }
 
 bootstrap();
