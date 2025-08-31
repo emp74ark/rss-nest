@@ -15,7 +15,7 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { SessionUserId } from '../auth/decorators';
 import { GetPaginationArgs } from '../shared/decorators';
-import { Pagination } from '../shared/entities';
+import { Pagination, SortOrder } from '../shared/entities';
 
 @Controller('article')
 export class ArticleController {
@@ -31,14 +31,25 @@ export class ArticleController {
     @SessionUserId() sessionUserId: string,
     @GetPaginationArgs() paginationArgs: Pagination,
     @Query('read') read?: 'true' | 'false',
-    @Query('tags', new ParseArrayPipe({ optional: true, items: String }))
+    @Query(
+      'tags',
+      new ParseArrayPipe({
+        optional: true,
+        items: String,
+      }),
+    )
     tags?: string[],
+    @Query('dateSort')
+    dateSort: SortOrder = SortOrder.Desc,
   ) {
     return this.articleService.findAllByUser({
       userId: sessionUserId,
       pagination: paginationArgs,
       read,
       tags,
+      sort: {
+        date: dateSort,
+      },
     });
   }
 
