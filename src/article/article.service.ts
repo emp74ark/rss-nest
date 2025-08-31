@@ -4,7 +4,7 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Article } from '../schemas/article.schema';
-import { Paginated, Pagination } from '../shared/entities';
+import { Paginated, Pagination, SortOrder } from '../shared/entities';
 import puppeteer from 'puppeteer';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
@@ -22,11 +22,15 @@ export class ArticleService {
     pagination,
     read,
     tags,
+    sort,
   }: {
     userId?: string;
     pagination: Pagination;
     read?: 'true' | 'false';
     tags?: string[];
+    sort: {
+      date: SortOrder;
+    };
   }): Promise<Paginated<Article>> {
     const query = {
       userId: userId,
@@ -46,6 +50,7 @@ export class ArticleService {
         $facet: {
           count: [{ $count: 'total' }],
           current: [
+            { $sort: { isoDate: sort.date === SortOrder.Asc ? 1 : -1 } },
             { $skip: (pagination.pageNumber - 1) * pagination.perPage },
             { $limit: pagination.perPage },
           ],
