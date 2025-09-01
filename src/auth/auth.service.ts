@@ -29,6 +29,10 @@ export class AuthService {
       return null;
     }
 
+    await this.userModel.findByIdAndUpdate(user._id, {
+      lastLogin: new Date(),
+    });
+
     return user;
   }
 
@@ -45,6 +49,7 @@ export class AuthService {
       login,
       role: Role.User,
       password: hash,
+      lastLogin: new Date(),
     }).save();
 
     if (!user) {
