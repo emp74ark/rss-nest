@@ -1,7 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Role } from '../../shared/entities';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class AuthDto {
+export class AuthLogInDto {
   @IsString()
   @IsNotEmpty()
   login: string;
@@ -9,8 +8,10 @@ export class AuthDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+}
 
+export class AuthSignUpDto {
   @IsString()
-  @IsOptional()
-  role?: Role;
+  @IsNotEmpty()
+  password: string;
 }
