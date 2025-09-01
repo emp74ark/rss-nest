@@ -41,12 +41,16 @@ export class ArticleController {
     tags?: string[],
     @Query('dateSort')
     dateSort: SortOrder = SortOrder.Desc,
+    @Query('subscription') subscription?: string,
   ) {
     return this.articleService.findAllByUser({
       userId: sessionUserId,
       pagination: paginationArgs,
-      read,
-      tags,
+      filter: {
+        read,
+        tags,
+        subscription,
+      },
       sort: {
         date: dateSort,
       },

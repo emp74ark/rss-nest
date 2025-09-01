@@ -20,14 +20,16 @@ export class ArticleService {
   async findAllByUser({
     userId,
     pagination,
-    read,
-    tags,
+    filter,
     sort,
   }: {
     userId?: string;
     pagination: Pagination;
-    read?: 'true' | 'false';
-    tags?: string[];
+    filter: {
+      read?: 'true' | 'false';
+      tags?: string[];
+      subscription?: string;
+    };
     sort: {
       date: SortOrder;
     };
@@ -36,12 +38,16 @@ export class ArticleService {
       userId: userId,
     };
 
-    if (read) {
-      query['read'] = read === 'true';
+    if (filter.read) {
+      query['read'] = filter.read === 'true';
     }
 
-    if (tags?.length) {
-      query['tags'] = { $in: tags };
+    if (filter.tags?.length) {
+      query['tags'] = { $in: filter.tags };
+    }
+
+    if (filter.subscription) {
+      query['subscriptionId'] = filter.subscription;
     }
 
     const result: Paginated<Article>[] = await this.articleModel.aggregate([
