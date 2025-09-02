@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -16,7 +17,9 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { SessionUserId } from '../auth/decorators';
 import { GetPaginationArgs } from '../shared/decorators';
 import { Pagination, SortOrder } from '../shared/entities';
+import { SessionGuard } from '../auth/guards';
 
+@UseGuards(SessionGuard)
 @Controller('article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
