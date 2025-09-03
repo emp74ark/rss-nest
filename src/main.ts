@@ -30,7 +30,7 @@ async function bootstrap() {
   app.useGlobalFilters(new MongooseExceptionFilter());
 
   app.enableCors({
-    origin: [appConfig.webClient],
+    origin: [appConfig.webClient, appConfig.corsEnabled],
     credentials: true,
   });
 
