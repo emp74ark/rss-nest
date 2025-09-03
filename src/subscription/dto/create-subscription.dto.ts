@@ -6,6 +6,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { SubscriptionSettings } from '../entities/subscription.entity';
+import { Type } from 'class-transformer';
 
 export class CreateSubscriptionDto {
   @IsString()
@@ -23,5 +24,6 @@ export class CreateSubscriptionDto {
 
   @ValidateNested()
   @IsOptional()
+  @Type(() => SubscriptionSettings)
   settings?: SubscriptionSettings;
 }

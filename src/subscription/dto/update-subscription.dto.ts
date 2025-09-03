@@ -8,6 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { SubscriptionSettings } from '../entities/subscription.entity';
+import { Type } from 'class-transformer';
 
 export class UpdateSubscriptionDto extends PartialType(CreateSubscriptionDto) {
   @IsString()
@@ -24,5 +25,6 @@ export class UpdateSubscriptionDto extends PartialType(CreateSubscriptionDto) {
   articles: string[];
 
   @ValidateNested()
+  @Type(() => SubscriptionSettings)
   settings: SubscriptionSettings;
 }

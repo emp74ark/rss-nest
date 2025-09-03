@@ -1,7 +1,5 @@
 import { IsBoolean } from 'class-validator';
 
-export class Subscription {}
-
 export class SubscriptionSettings {
   @IsBoolean()
   enabled?: boolean;
