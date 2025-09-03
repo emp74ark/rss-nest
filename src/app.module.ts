@@ -11,6 +11,7 @@ import { ArticleModule } from './article/article.module';
 import { TagModule } from './tag/tag.module';
 import packageJson from './config/packageJson';
 import { appConfig } from './config/dotenv';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { appConfig } from './config/dotenv';
     SubscriptionModule,
     ArticleModule,
     TagModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
