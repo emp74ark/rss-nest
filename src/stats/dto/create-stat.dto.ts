@@ -16,8 +16,9 @@ export class CreateStatDto {
     this.localTime = timestamp ? new Date(timestamp) : undefined;
     this.ip = ip?.toString();
     this.client = {
-      host: headers?.['host'],
+      origin: headers?.['origin'],
       userAgent: headers?.['user-agent'],
+      languages: headers?.['accept-language'],
     };
   }
 
