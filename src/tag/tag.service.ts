@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ConflictException, Injectable, OnModuleInit } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -34,16 +34,25 @@ export class TagService implements OnModuleInit {
     return this.tagModel.find({ userId: 'all' });
   }
 
-  create({
+  async create({
     userId,
-    createTagDto,
+    createTagDto: { name },
   }: {
     userId: string;
     createTagDto: CreateTagDto;
   }) {
+    const existing = await this.tagModel.findOne({
+      userId: { $in: [userId, 'all'] },
+      name,
+    });
+
+    if (existing) {
+      throw new ConflictException(`Tag ${name} already exists`);
+    }
+
     return this.tagModel.create({
       userId: userId,
-      ...createTagDto,
+      name,
     });
   }
 
