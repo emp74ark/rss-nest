@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import session from 'express-session';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { MongooseExceptionFilter } from './filters/mongoose-exception.filter';
 import { appConfig } from './config/dotenv';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: new Logger(),
+  });
 
   app.use(
     session({
@@ -29,10 +31,14 @@ async function bootstrap() {
 
   app.useGlobalFilters(new MongooseExceptionFilter());
 
+  const origins = [appConfig.webClient, appConfig.corsEnabled];
+
   app.enableCors({
-    origin: [appConfig.webClient, appConfig.corsEnabled],
+    origin: origins,
     credentials: true,
   });
+
+  new Logger().log(`Whitelist origins: ${origins.join(', ')}`);
 
   await app.listen(appConfig.port);
 }
