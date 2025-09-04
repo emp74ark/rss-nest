@@ -26,7 +26,12 @@ export class StatsController {
     @Query('timestamp', ParseIntPipe) timestamp: number,
   ) {
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    const dto = new CreateStatDto({ source, timestamp, ip });
+    const dto = new CreateStatDto({
+      source,
+      timestamp,
+      ip,
+      headers: req.headers,
+    });
     await this.statsService.create(dto);
     return { message: 'ok' };
   }
@@ -42,13 +47,13 @@ export class StatsController {
   @RequiredRole(Role.Admin)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.statsService.findOne(+id);
+    return this.statsService.findOne(id);
   }
 
   @UseGuards(SessionGuard, RoleGuard)
   @RequiredRole(Role.Admin)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.statsService.remove(+id);
+    return this.statsService.remove(id);
   }
 }

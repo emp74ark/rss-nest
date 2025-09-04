@@ -15,11 +15,11 @@ export class StatsService {
     return this.statsModel.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.statsModel.findById(id);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.statsModel.findByIdAndDelete(id);
   }
 }

@@ -14,6 +14,9 @@ export class Stats {
   @Prop()
   ip: string;
 
+  @Prop({ type: Object })
+  client: object;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 }
