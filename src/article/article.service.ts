@@ -89,18 +89,33 @@ export class ArticleService {
       .exec();
   }
 
-  findOne(id: string) {
-    return this.articleModel.findById(id);
+  findOne({ id, userId }: { id: string; userId: string }) {
+    return this.articleModel.findOne({ _id: id, userId });
   }
 
-  updateOne(id: string, updateArticleDto: UpdateArticleDto) {
-    return this.articleModel.findByIdAndUpdate(id, updateArticleDto, {
-      new: true,
-    });
+  updateOne({
+    id,
+    userId,
+    updateArticleDto,
+  }: {
+    id: string;
+    updateArticleDto: UpdateArticleDto;
+    userId: string;
+  }) {
+    return this.articleModel.findOneAndUpdate(
+      {
+        _id: id,
+        userId,
+      },
+      updateArticleDto,
+      {
+        new: true,
+      },
+    );
   }
 
-  remove(id: string) {
-    return this.articleModel.findByIdAndDelete(id);
+  remove({ id, userId }: { id: string; userId: string }) {
+    return this.articleModel.findOneAndDelete({ _id: id, userId });
   }
 
   addMany({
@@ -119,25 +134,40 @@ export class ArticleService {
     return this.articleModel.insertMany(articles);
   }
 
-  updateMany({ ids, article }: { ids: string[]; article: UpdateArticleDto }) {
+  updateMany({
+    ids,
+    article,
+    userId,
+  }: {
+    ids: string[];
+    article: UpdateArticleDto;
+    userId: string;
+  }) {
     return this.articleModel.updateMany(
       {
         _id: { $in: ids },
+        userId,
       },
       article,
     );
   }
 
-  updateAll({ article }: { article: UpdateArticleDto }) {
-    return this.articleModel.updateMany({}, article);
+  updateAll({
+    article,
+    userId,
+  }: {
+    article: UpdateArticleDto;
+    userId: string;
+  }) {
+    return this.articleModel.updateMany({ userId }, article);
   }
 
-  deleteMany({ feedId }: { feedId?: string }) {
-    return this.articleModel.deleteMany({ feedId });
+  deleteMany({ feedId, userId }: { feedId: string; userId: string }) {
+    return this.articleModel.deleteMany({ feedId, userId });
   }
 
-  async getFullText({ id }: { id: string }) {
-    const article = await this.articleModel.findById(id);
+  async getFullText({ id, userId }: { id: string; userId: string }) {
+    const article = await this.articleModel.findOne({ _id: id, userId });
 
     if (!article) {
       throw new NotFoundException('Article does not exist');

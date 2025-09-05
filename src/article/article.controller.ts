@@ -31,7 +31,7 @@ export class ArticleController {
 
   @Get()
   findAll(
-    @SessionUserId() sessionUserId: string,
+    @SessionUserId() userId: string,
     @GetPaginationArgs() paginationArgs: Pagination,
     @Query('read') read?: 'true' | 'false',
     @Query(
@@ -47,7 +47,7 @@ export class ArticleController {
     @Query('feed') feed?: string,
   ) {
     return this.articleService.findAllByUser({
-      userId: sessionUserId,
+      userId,
       pagination: paginationArgs,
       filter: {
         read,
@@ -61,36 +61,45 @@ export class ArticleController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.articleService.findOne(id);
+  findOne(@SessionUserId() userId: string, @Param('id') id: string) {
+    return this.articleService.findOne({ id, userId });
   }
 
   @Get(':id/full')
-  fullText(@Param('id') id: string) {
-    return this.articleService.getFullText({ id });
+  fullText(@SessionUserId() userId: string, @Param('id') id: string) {
+    return this.articleService.getFullText({ id, userId });
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
-    return this.articleService.updateOne(id, updateArticleDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateArticleDto: UpdateArticleDto,
+    @SessionUserId() userId: string,
+  ) {
+    return this.articleService.updateOne({ id, updateArticleDto, userId });
   }
 
   @Patch()
   updateMany(
+    @SessionUserId() userId: string,
     @Body() updateArticleDto: UpdateArticleDto & { ids: string[] },
     @Query('all', ParseBoolPipe) all: boolean,
   ) {
     if (all) {
-      return this.articleService.updateAll({ article: updateArticleDto });
+      return this.articleService.updateAll({
+        article: updateArticleDto,
+        userId,
+      });
     }
     return this.articleService.updateMany({
       ids: updateArticleDto.ids,
       article: updateArticleDto,
+      userId,
     });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.articleService.remove(id);
+  remove(@SessionUserId() userId: string, @Param('id') id: string) {
+    return this.articleService.remove({ id, userId });
   }
 }

@@ -24,50 +24,54 @@ export class FeedController {
   @Post()
   create(
     @Body() createFeedDto: CreateFeedDto,
-    @SessionUserId() sessionUserId: string,
+    @SessionUserId() userId: string,
   ) {
     return this.feedService.create({
       createFeedDto,
-      userId: sessionUserId,
+      userId,
     });
   }
 
   @Get()
   findAll(
-    @SessionUserId() sessionUserId: string,
+    @SessionUserId() userId: string,
     @GetPaginationArgs() paginationArgs: Pagination,
   ) {
     return this.feedService.findAll({
-      userId: sessionUserId,
+      userId,
       pagination: paginationArgs,
     });
   }
 
   @Get('/refresh')
-  refreshAll(@SessionUserId() sessionUserId: string) {
-    return this.feedService.refreshAll({ userId: sessionUserId });
+  refreshAll(@SessionUserId() userId: string) {
+    return this.feedService.refreshAll({ userId });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.feedService.findOne(id);
+  findOne(@SessionUserId() userId: string, @Param('id') id: string) {
+    return this.feedService.findOne({ id, userId });
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFeedDto: UpdateFeedDto) {
-    return this.feedService.update(id, updateFeedDto);
+  update(
+    @SessionUserId() userId: string,
+    @Param('id') id: string,
+    @Body() updateFeedDto: UpdateFeedDto,
+  ) {
+    return this.feedService.update({ id, updateFeedDto, userId });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.feedService.remove(id);
+  remove(@SessionUserId() userId: string, @Param('id') id: string) {
+    return this.feedService.remove({ id, userId });
   }
 
   @Get(':id/refresh')
-  refreshOne(@Param('id') id: string, @SessionUserId() sessionUserId: string) {
+  refreshOne(@Param('id') id: string, @SessionUserId() userId: string) {
     return this.feedService.refreshOne({
       feedId: id,
-      userId: sessionUserId,
+      userId,
     });
   }
 }

@@ -89,17 +89,25 @@ export class FeedService {
     return result[0];
   }
 
-  async findOne(id: string) {
-    const feed = await this.feedModel.findOne({ _id: id }).exec();
+  async findOne({ id, userId }: { id: string; userId: string }) {
+    const feed = await this.feedModel.findOne({ _id: id, userId }).exec();
     if (!feed) {
       throw new NotFoundException('Feed not found');
     }
     return feed;
   }
 
-  async update(id: string, updateFeedDto: UpdateFeedDto) {
+  async update({
+    id,
+    userId,
+    updateFeedDto,
+  }: {
+    id: string;
+    userId: string;
+    updateFeedDto: UpdateFeedDto;
+  }) {
     const feed = await this.feedModel
-      .findByIdAndUpdate(id, updateFeedDto, { new: true })
+      .findOneAndUpdate({ _id: id, userId }, updateFeedDto, { new: true })
       .exec();
     if (!feed) {
       throw new NotFoundException('Feed not found');
@@ -107,9 +115,9 @@ export class FeedService {
     return feed;
   }
 
-  async remove(id: string) {
-    await this.articleService.deleteMany({ feedId: id });
-    return this.feedModel.findByIdAndDelete(id).exec();
+  async remove({ id, userId }: { id: string; userId: string }) {
+    await this.articleService.deleteMany({ feedId: id, userId });
+    return this.feedModel.findOneAndDelete({ _id: id, userId }).exec();
   }
 
   async refreshOne({ userId, feedId }: { userId?: string; feedId: string }) {
@@ -117,7 +125,7 @@ export class FeedService {
       throw new BadRequestException('User ID is required');
     }
 
-    const feed = await this.findOne(feedId);
+    const feed = await this.findOne({ id: feedId, userId });
     if (!feed) {
       throw new NotFoundException('Feed not found');
     }
