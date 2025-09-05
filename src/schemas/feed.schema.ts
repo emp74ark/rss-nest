@@ -6,9 +6,6 @@ import { Article } from './article.schema';
 class FeedSettings {
   @Prop({ default: false })
   enabled: boolean;
-
-  @Prop({ default: false })
-  loadFullText: boolean;
 }
 
 const SettingsSchema = SchemaFactory.createForClass(FeedSettings);
