@@ -1,98 +1,93 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backand fo the RSS feeds client
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This repository is a NestJS backend for an [RSS feeds client](https://github.com/emp74ark/rss-angular). 
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Prerequisites
+- Node.js 18+ (recommended: LTS)
+- npm 9+
+- MongoDB instance (unless you use Docker compose or a remote DB)
 
-## Description
+## Quick start
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+1. Install dependencies:
+   
+   ```bash
+   npm install
+   ```
 
-## Project setup
+2. Configure environment variables (see .env section below). If you don't provide any, sensible defaults are used.
 
-```bash
-$ npm install
-```
+3. Start the server in watch mode:
+   
+   ```bash
+   npm run start:dev
+   ```
 
-## Compile and run the project
+4. The API will listen on PORT (default 3600). Health check endpoint:
+   
+   - GET http://localhost:3600/health
 
-```bash
-# development
-$ npm run start
+## Environment variables (.env)
+The application reads the following environment variables (all optional, defaults shown):
 
-# watch mode
-$ npm run start:dev
+- AUTH_SECRET: session secret string (default: "secret")
+- COOKIE_NAME: session cookie name (default: "connect.sid")
+- PORT: server port (default: "3600")
+- WEB_CLIENT: allowed CORS origin for the frontend (default: "http://localhost:4200")
+- DB_HOST: MongoDB connection URI (default: "mongodb://rss-db/rss")
+- CORS_ENABLED: optional additional origin to allow (string). If set, will be added to CORS origins.
+- ORPHANED_USER: number of months of inactivity after which users are considered orphaned and may be removed (default: 2)
 
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
+You can create a .env file in the project root with any of the variables above.
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Using docker compose: [repository](https://github.com/emp74ark/rss-deploy)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Authentication & sessions
+- The API uses cookie-based sessions (express-session). After successful auth, a session cookie (name from COOKIE_NAME, default: connect.sid) is set and used for subsequent requests.
+- Login/signup endpoints return the user object.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## API endpoints overview
+- Health
+  - GET /health — service status and version.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- Auth
+  - POST /auth/login — body: { login, password } → returns user (no password). Sets session.
+  - POST /auth/signup — body: { password } → creates a user with automatically generated login. Sets session.
+  - GET /auth/logout — clears the session cookie.
 
-## Resources
+- User
+  - POST /user — Admin only. Create user. body: { login, password, role }
+  - GET /user — Admin only. Paginated list. Query: pageNumber, perPage
+  - GET /user/self — current user info
+  - GET /user/:id — get user by id
+  - PATCH /user/:id — update fields { login?, password?, role? }
+  - DELETE /user/orphaned — Admin only. Delete users inactive for `ORPHANED_USER` months and their related data
+  - DELETE /user/:id — delete user by id (204 No Content)
 
-Check out a few resources that may come in handy when working with NestJS:
+- Feed (requires session)
+  - POST /feed — create a feed
+  - GET /feed — list feeds for
+  - GET /feed/refresh — refresh all feeds
+  - GET /feed/:id — get one feed
+  - PATCH /feed/:id — update feed
+  - DELETE /feed/:id — remove feed
+  - GET /feed/:id/refresh — refresh one feed
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- Article (requires session)
+  - POST /article — create article
+  - GET /article — list articles
+    - Query filters: read=true|false, tags=[t1,t2], feed=feedId, dateSort=asc|desc
+  - GET /article/:id — get one article
+  - GET /article/:id/full — fetch full-text content for article
+  - PATCH /article/:id — update single article
+  - PATCH /article?all=true — bulk update all articles that match criteria
+  - DELETE /article/:id — remove article
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Tag (requires session)
+  - POST /tag — create tag
+  - GET /tag — list tags. Query: default=true to get default tags
+  - GET /tag/:name — get one tag by name
+  - PATCH /tag/:name — update tag
+  - DELETE /tag/:name — delete tag
