@@ -55,6 +55,8 @@ export class UserService {
       );
     }
 
+    Reflect.deleteProperty(user, 'password');
+
     return user;
   }
 
@@ -73,6 +75,9 @@ export class UserService {
             },
             {
               $limit: pagination.perPage,
+            },
+            {
+              $project: { password: 0 },
             },
           ],
         },
@@ -96,12 +101,13 @@ export class UserService {
   }
 
   findOne(id: string) {
-    return this.userModel.findById(id);
+    return this.userModel.findById(id, { password: 0 });
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
     return this.userModel.findByIdAndUpdate(id, updateUserDto, {
       new: true,
+      select: { password: 0 },
     });
   }
 
@@ -109,12 +115,10 @@ export class UserService {
     const deletedTags = await this.tagModel.deleteMany({
       userId: { $in: userIds.map((el) => el._id.toHexString()) },
     });
-    console.log('DELETED TAGS', deletedTags);
 
     const deletedFeeds = await this.feedModel.deleteMany({
       userId: { $in: userIds },
     });
-    console.log('DELETED FEEDS', deletedFeeds);
 
     return {
       deletedTags: deletedTags.deletedCount,
@@ -131,7 +135,9 @@ export class UserService {
 
     await this.removeUserData({ userIds: [user._id] });
 
-    return this.userModel.findByIdAndDelete(user?._id);
+    return this.userModel.findByIdAndDelete(user?._id, {
+      select: { password: 0 },
+    });
   }
 
   async removeOrphaned() {
