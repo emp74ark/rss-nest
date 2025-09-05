@@ -1,6 +1,6 @@
 # Backand fo the RSS feeds client
 
-This repository is a NestJS backend for an RSS feeds client. 
+This repository is a NestJS backend for an [RSS feeds client](https://github.com/emp74ark/rss-angular). 
 
 ## Prerequisites
 - Node.js 18+ (recommended: LTS)
