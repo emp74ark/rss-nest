@@ -122,6 +122,10 @@ export class FeedService {
       throw new NotFoundException('Feed not found');
     }
 
+    if (!feed.settings.enabled) {
+      throw new BadRequestException('Feed is disabled');
+    }
+
     const existingArticles = await this.articleService.findAllByFeed({
       userId,
       feedId: feedId,
@@ -154,7 +158,10 @@ export class FeedService {
   }
 
   async refreshAll({ userId }: { userId: string }) {
-    const feeds = await this.feedModel.find({ userId });
+    const feeds = await this.feedModel.find({
+      userId,
+      settings: { enabled: true },
+    });
 
     const promises = feeds.map((s) => {
       return this.refreshOne({ userId, feedId: s._id.toHexString() });

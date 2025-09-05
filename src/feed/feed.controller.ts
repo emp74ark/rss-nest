@@ -54,11 +54,8 @@ export class FeedController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateSubscriptionDto: UpdateFeedDto,
-  ) {
-    return this.feedService.update(id, updateSubscriptionDto);
+  update(@Param('id') id: string, @Body() updateFeedDto: UpdateFeedDto) {
+    return this.feedService.update(id, updateFeedDto);
   }
 
   @Delete(':id')
