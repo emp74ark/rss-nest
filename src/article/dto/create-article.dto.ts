@@ -14,7 +14,7 @@ export class CreateArticleDto {
 
   @IsMongoId()
   @IsOptional()
-  subscriptionId?: string;
+  feedId?: string;
 
   @IsString()
   title: string;

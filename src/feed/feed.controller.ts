@@ -8,26 +8,26 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { SubscriptionService } from './subscription.service';
-import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { FeedService } from './feed.service';
+import { CreateFeedDto } from './dto/create-feed.dto';
+import { UpdateFeedDto } from './dto/update-feed.dto';
 import { SessionGuard } from '../auth/guards';
 import { SessionUserId } from '../auth/decorators';
 import { GetPaginationArgs } from '../shared/decorators';
 import { Pagination } from '../shared/entities';
 
 @UseGuards(SessionGuard)
-@Controller('subscription')
-export class SubscriptionController {
-  constructor(private readonly subscriptionService: SubscriptionService) {}
+@Controller('feed')
+export class FeedController {
+  constructor(private readonly feedService: FeedService) {}
 
   @Post()
   create(
-    @Body() createSubscriptionDto: CreateSubscriptionDto,
+    @Body() createFeedDto: CreateFeedDto,
     @SessionUserId() sessionUserId: string,
   ) {
-    return this.subscriptionService.create({
-      createSubscriptionDto,
+    return this.feedService.create({
+      createFeedDto,
       userId: sessionUserId,
     });
   }
@@ -37,7 +37,7 @@ export class SubscriptionController {
     @SessionUserId() sessionUserId: string,
     @GetPaginationArgs() paginationArgs: Pagination,
   ) {
-    return this.subscriptionService.findAll({
+    return this.feedService.findAll({
       userId: sessionUserId,
       pagination: paginationArgs,
     });
@@ -45,31 +45,31 @@ export class SubscriptionController {
 
   @Get('/refresh')
   refreshAll(@SessionUserId() sessionUserId: string) {
-    return this.subscriptionService.refreshAll({ userId: sessionUserId });
+    return this.feedService.refreshAll({ userId: sessionUserId });
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.subscriptionService.findOne(id);
+    return this.feedService.findOne(id);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateSubscriptionDto: UpdateSubscriptionDto,
+    @Body() updateSubscriptionDto: UpdateFeedDto,
   ) {
-    return this.subscriptionService.update(id, updateSubscriptionDto);
+    return this.feedService.update(id, updateSubscriptionDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.subscriptionService.remove(id);
+    return this.feedService.remove(id);
   }
 
   @Get(':id/refresh')
   refreshOne(@Param('id') id: string, @SessionUserId() sessionUserId: string) {
-    return this.subscriptionService.refreshOne({
-      subscriptionId: id,
+    return this.feedService.refreshOne({
+      feedId: id,
       userId: sessionUserId,
     });
   }

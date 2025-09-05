@@ -5,10 +5,10 @@ import {
   IsUrl,
   ValidateNested,
 } from 'class-validator';
-import { SubscriptionSettings } from '../entities/subscription.entity';
+import { FeedSettings } from '../entities/feed.entity';
 import { Type } from 'class-transformer';
 
-export class CreateSubscriptionDto {
+export class CreateFeedDto {
   @IsString()
   @IsNotEmpty()
   title: string;
@@ -24,6 +24,6 @@ export class CreateSubscriptionDto {
 
   @ValidateNested()
   @IsOptional()
-  @Type(() => SubscriptionSettings)
-  settings?: SubscriptionSettings;
+  @Type(() => FeedSettings)
+  settings?: FeedSettings;
 }

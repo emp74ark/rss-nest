@@ -28,7 +28,7 @@ export class ArticleService {
     filter: {
       read?: 'true' | 'false';
       tags?: string[];
-      subscription?: string;
+      feed?: string;
     };
     sort: {
       date: SortOrder;
@@ -46,8 +46,8 @@ export class ArticleService {
       query['tags'] = { $in: filter.tags };
     }
 
-    if (filter.subscription) {
-      query['subscriptionId'] = filter.subscription;
+    if (filter.feed) {
+      query['feedId'] = filter.feed;
     }
 
     const result: Paginated<Article>[] = await this.articleModel.aggregate([
@@ -80,17 +80,11 @@ export class ArticleService {
     return result[0];
   }
 
-  findAllBySubscription({
-    userId,
-    subscriptionId,
-  }: {
-    userId: string;
-    subscriptionId: string;
-  }) {
+  findAllByFeed({ userId, feedId }: { userId: string; feedId: string }) {
     return this.articleModel
       .find({
-        userId: userId,
-        subscriptionId: subscriptionId,
+        userId,
+        feedId,
       })
       .exec();
   }
@@ -111,16 +105,16 @@ export class ArticleService {
 
   addMany({
     userId,
-    subscriptionId,
+    feedId,
     articles,
   }: {
     userId: string | mongoose.Types.ObjectId;
-    subscriptionId: string | mongoose.Types.ObjectId;
+    feedId: string | mongoose.Types.ObjectId;
     articles: CreateArticleDto[];
   }) {
     articles.forEach((article) => {
       Reflect.set(article, 'userId', userId);
-      Reflect.set(article, 'subscriptionId', subscriptionId);
+      Reflect.set(article, 'feedId', feedId);
     });
     return this.articleModel.insertMany(articles);
   }
@@ -138,8 +132,8 @@ export class ArticleService {
     return this.articleModel.updateMany({}, article);
   }
 
-  deleteMany({ subscriptionId }: { subscriptionId?: string }) {
-    return this.articleModel.deleteMany({ subscriptionId: subscriptionId });
+  deleteMany({ feedId }: { feedId?: string }) {
+    return this.articleModel.deleteMany({ feedId });
   }
 
   async getFullText({ id }: { id: string }) {

@@ -1,6 +1,6 @@
 {
   "name": "@emp74ark/rss-nest",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Backend for RSS Feeds client",
   "author": "emp74ark",
   "private": true,

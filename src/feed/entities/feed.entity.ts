@@ -1,6 +1,6 @@
 import { IsBoolean } from 'class-validator';
 
-export class SubscriptionSettings {
+export class FeedSettings {
   @IsBoolean()
   enabled?: boolean;
 

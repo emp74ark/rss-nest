@@ -18,7 +18,7 @@ import { AuthService } from './auth.service';
 import { AuthLogInDto, AuthSignUpDto } from './dto';
 import { SessionGuard } from './guards';
 import { AuthLogInterceptor } from './interceptors/auth-log.interceptor';
-import { AuthResponseMessage } from './enums';
+import { AuthResponseMessage } from './auth.enums';
 
 @Controller('auth')
 export class AuthController {
