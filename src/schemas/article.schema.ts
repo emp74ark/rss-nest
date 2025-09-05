@@ -8,8 +8,8 @@ export class Article {
   @Prop({ type: mongoose.Types.ObjectId, ref: 'users' })
   userId: string;
 
-  @Prop({ type: mongoose.Types.ObjectId, ref: 'subscriptions' })
-  subscriptionId: string;
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'feeds' })
+  feedId: string;
 
   @Prop({ required: true })
   title: string;

@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateSubscriptionDto } from './create-subscription.dto';
+import { CreateFeedDto } from './create-feed.dto';
 import {
   IsArray,
   IsMongoId,
@@ -7,9 +7,10 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { SubscriptionSettings } from '../entities/subscription.entity';
+import { FeedSettings } from '../entities/feed.entity';
+import { Type } from 'class-transformer';
 
-export class UpdateSubscriptionDto extends PartialType(CreateSubscriptionDto) {
+export class UpdateFeedDto extends PartialType(CreateFeedDto) {
   @IsString()
   @IsOptional()
   title: string;
@@ -24,5 +25,6 @@ export class UpdateSubscriptionDto extends PartialType(CreateSubscriptionDto) {
   articles: string[];
 
   @ValidateNested()
-  settings: SubscriptionSettings;
+  @Type(() => FeedSettings)
+  settings: FeedSettings;
 }

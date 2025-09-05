@@ -3,20 +3,17 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Article } from './article.schema';
 
 @Schema({ _id: false })
-class SubscriptionSettings {
+class FeedSettings {
   @Prop({ default: false })
   enabled: boolean;
-
-  @Prop({ default: false })
-  loadFullText: boolean;
 }
 
-const SettingsSchema = SchemaFactory.createForClass(SubscriptionSettings);
+const SettingsSchema = SchemaFactory.createForClass(FeedSettings);
 
-export type SubscriptionDocument = HydratedDocument<SourceSubscription>;
+export type FeedDocument = HydratedDocument<SourceFeed>;
 
 @Schema()
-export class SourceSubscription {
+export class SourceFeed {
   @Prop({ type: mongoose.Schema.ObjectId, ref: 'users', required: true })
   userId: string;
 
@@ -40,7 +37,7 @@ export class SourceSubscription {
   lastUpdate: Date;
 
   @Prop({ type: SettingsSchema })
-  settings: SubscriptionSettings;
+  settings: FeedSettings;
 
   @Prop({ default: Date.now })
   createdAt: Date;
@@ -49,10 +46,9 @@ export class SourceSubscription {
   modifiedAt: Date;
 }
 
-export const SubscriptionSchema =
-  SchemaFactory.createForClass(SourceSubscription);
+export const FeedSchema = SchemaFactory.createForClass(SourceFeed);
 
-SubscriptionSchema.pre('findOneAndUpdate', function (next) {
+FeedSchema.pre('findOneAndUpdate', function (next) {
   this.set({ modifiedAt: new Date() });
   next();
 });

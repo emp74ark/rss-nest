@@ -23,7 +23,9 @@ import { GetPaginationArgs } from '../shared/decorators';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(SessionGuard, RoleGuard)
   @Post()
+  @RequiredRole(Role.Admin)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -65,6 +67,13 @@ export class UserController {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  @UseGuards(SessionGuard, RoleGuard)
+  @RequiredRole(Role.Admin)
+  @Delete('/orphaned')
+  deleteOrphaned() {
+    return this.userService.removeOrphaned();
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

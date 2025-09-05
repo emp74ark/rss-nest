@@ -24,16 +24,13 @@ export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Post()
-  create(
-    @Body() createTagDto: CreateTagDto,
-    @SessionUserId() sessionUserId: string,
-  ) {
-    return this.tagService.create({ userId: sessionUserId, createTagDto });
+  create(@Body() createTagDto: CreateTagDto, @SessionUserId() userId: string) {
+    return this.tagService.create({ userId, createTagDto });
   }
 
   @Get()
   findAll(
-    @SessionUserId() sessionUserId: string,
+    @SessionUserId() userId: string,
     @GetPaginationArgs() paginationArgs: Pagination,
     @Query('default', new ParseBoolPipe({ optional: true }))
     defaultTags: boolean = false,
@@ -42,31 +39,31 @@ export class TagController {
       return this.tagService.getDefaultTags();
     }
     return this.tagService.findAll({
-      userId: sessionUserId,
+      userId,
       pagination: paginationArgs,
     });
   }
 
   @Get(':name')
-  findOne(@Param('name') name: string, @SessionUserId() sessionUserId: string) {
-    return this.tagService.findOne({ tagName: name, userId: sessionUserId });
+  findOne(@Param('name') name: string, @SessionUserId() userId: string) {
+    return this.tagService.findOne({ tagName: name, userId });
   }
 
   @Patch(':name')
   update(
     @Param('name') name: string,
     @Body() updateTagDto: UpdateTagDto,
-    @SessionUserId() sessionUserId: string,
+    @SessionUserId() userId: string,
   ) {
     return this.tagService.update({
-      userId: sessionUserId,
+      userId,
       tagName: name,
       updateTagDto,
     });
   }
 
   @Delete(':name')
-  remove(@Param('name') name: string, @SessionUserId() sessionUserId: string) {
-    return this.tagService.remove({ tagName: name, userId: sessionUserId });
+  remove(@Param('name') name: string, @SessionUserId() userId: string) {
+    return this.tagService.remove({ tagName: name, userId });
   }
 }

@@ -15,10 +15,10 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto';
+import { AuthLogInDto, AuthSignUpDto } from './dto';
 import { SessionGuard } from './guards';
 import { AuthLogInterceptor } from './interceptors/auth-log.interceptor';
-import { AuthResponseMessage } from './enums';
+import { AuthResponseMessage } from './auth.enums';
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +28,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
-    @Body() dto: AuthDto,
+    @Body() dto: AuthLogInDto,
     @Session() session: Record<string, unknown>,
   ) {
     const user = await this.authService.login(dto);
@@ -48,16 +48,10 @@ export class AuthController {
   @UseInterceptors(AuthLogInterceptor)
   @Post('signup')
   async signup(
-    @Body() dto: AuthDto,
+    @Body() dto: AuthSignUpDto,
     @Session() session: Record<string, unknown>,
   ) {
     const user = await this.authService.signup(dto);
-    if (!user) {
-      throw new UnauthorizedException(
-        AuthResponseMessage.INCORRECT_CREDENTIALS,
-      );
-    }
-
     const userObject = user.toObject();
     Reflect.deleteProperty(userObject, 'password');
     session.user = userObject;

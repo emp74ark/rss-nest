@@ -8,7 +8,7 @@ export class Tag {
   @Prop({ type: mongoose.Types.ObjectId, ref: 'users' })
   userId: string;
 
-  @Prop({ unique: true })
+  @Prop({ required: true })
   name: string;
 
   @Prop({ default: Date.now })
