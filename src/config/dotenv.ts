@@ -10,4 +10,5 @@ export const appConfig = {
   webClient: process.env.WEB_CLIENT || 'http://localhost:4200',
   db: process.env.DB_HOST || 'mongodb://rss-db/rss',
   corsEnabled: process.env.CORS_ENABLED,
+  orphanedUser: Number(process.env.ORPHANED_USER) || 2,
 };

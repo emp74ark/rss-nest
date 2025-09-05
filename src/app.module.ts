@@ -12,6 +12,7 @@ import packageJson from './config/packageJson';
 import { appConfig } from './config/dotenv';
 import { StatsModule } from './stats/stats.module';
 import { FeedModule } from './feed/feed.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FeedModule } from './feed/feed.module';
     ArticleModule,
     TagModule,
     StatsModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

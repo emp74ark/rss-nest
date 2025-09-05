@@ -6,9 +6,8 @@ import { MongooseExceptionFilter } from './filters/mongoose-exception.filter';
 import { appConfig } from './config/dotenv';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: new Logger(),
-  });
+  const logger = new Logger('Bootstrap');
+  const app = await NestFactory.create(AppModule, { logger });
 
   app.use(
     session({
@@ -38,7 +37,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  new Logger().log(`Whitelist origins: ${origins.join(', ')}`);
+  logger.log(`Whitelist origins: ${origins.join(', ')}`);
 
   await app.listen(appConfig.port);
 }

@@ -1,14 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { Model } from 'mongoose';
 import { Paginated, Pagination, Role } from '../shared/entities';
+import { appConfig } from '../config/dotenv';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel('User') private userModel: Model<User>) {}
+  private readonly logger = new Logger('UserService');
 
   create(createUserDto: CreateUserDto) {
     if (!Object.values(Role).includes(createUserDto.role)) {
@@ -68,5 +70,17 @@ export class UserService {
 
   remove(id: string) {
     this.userModel.findByIdAndDelete(id);
+  }
+
+  removeOrphaned() {
+    const today = new Date();
+    const dateThreshold = new Date();
+    dateThreshold.setMonth(today.getMonth() - appConfig.orphanedUser);
+    this.logger.warn(
+      `Removing users older than ${dateThreshold.toISOString()}`,
+    );
+    this.userModel.deleteMany({
+      lastLogin: { $lt: dateThreshold },
+    });
   }
 }
