@@ -2,15 +2,15 @@ import {
   BadRequestException,
   ImATeapotException,
   Injectable,
+  InternalServerErrorException,
   Logger,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { Model, Types } from 'mongoose';
-import { Paginated, Pagination, Role } from '../shared/entities';
+import { Paginated, Pagination } from '../shared/entities';
 import { appConfig } from '../config/dotenv';
 import { Tag } from '../schemas/tags.schema';
 import { SourceFeed } from '../schemas/feed.schema';
@@ -27,11 +27,6 @@ export class UserService {
   private readonly logger = new Logger('UserService');
 
   async create(createUserDto: CreateUserDto) {
-    if (!Object.values(Role).includes(createUserDto.role)) {
-      throw new BadRequestException(
-        `Invalid role: ${createUserDto.role}. Supported roles are: ${Object.values(Role).join(', ')}`,
-      );
-    }
     const hash = await argon.hash(createUserDto.password);
 
     const existingUser = await this.userModel.findOne({
@@ -50,14 +45,13 @@ export class UserService {
     }).save();
 
     if (!user) {
-      throw new UnauthorizedException(
-        AuthResponseMessage.INCORRECT_CREDENTIALS,
-      );
+      throw new InternalServerErrorException('Failed to create user');
     }
 
-    Reflect.deleteProperty(user, 'password');
+    const userObject = user.toObject();
+    Reflect.deleteProperty(userObject, 'password');
 
-    return user;
+    return userObject;
   }
 
   async findAll({
