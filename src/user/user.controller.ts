@@ -69,6 +69,13 @@ export class UserController {
     return user;
   }
 
+  @UseGuards(SessionGuard, RoleGuard)
+  @RequiredRole(Role.Admin)
+  @Delete('/orphaned')
+  deleteOrphaned() {
+    return this.userService.removeOrphaned();
+  }
+
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   @UseGuards(SessionGuard)
