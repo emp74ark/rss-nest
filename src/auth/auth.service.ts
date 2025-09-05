@@ -10,7 +10,7 @@ import { Model } from 'mongoose';
 import { User } from '../schemas/user.schema';
 import { generateUsername } from 'unique-username-generator';
 import { Role } from '../shared/entities';
-import { AuthResponseMessage } from './enums';
+import { AuthResponseMessage } from './auth.enums';
 
 @Injectable()
 export class AuthService {

@@ -6,12 +6,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { SharedModule } from './shared/shared.module';
-import { SubscriptionModule } from './subscription/subscription.module';
 import { ArticleModule } from './article/article.module';
 import { TagModule } from './tag/tag.module';
 import packageJson from './config/packageJson';
 import { appConfig } from './config/dotenv';
 import { StatsModule } from './stats/stats.module';
+import { FeedModule } from './feed/feed.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { StatsModule } from './stats/stats.module';
     UserModule,
     AuthModule,
     SharedModule,
-    SubscriptionModule,
+    FeedModule,
     ArticleModule,
     TagModule,
     StatsModule,

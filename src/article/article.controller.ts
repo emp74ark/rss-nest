@@ -44,7 +44,7 @@ export class ArticleController {
     tags?: string[],
     @Query('dateSort')
     dateSort: SortOrder = SortOrder.Desc,
-    @Query('subscription') subscription?: string,
+    @Query('feed') feed?: string,
   ) {
     return this.articleService.findAllByUser({
       userId: sessionUserId,
@@ -52,7 +52,7 @@ export class ArticleController {
       filter: {
         read,
         tags,
-        subscription,
+        feed,
       },
       sort: {
         date: dateSort,
