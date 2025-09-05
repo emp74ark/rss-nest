@@ -11,7 +11,6 @@ import { Request } from 'express';
 
 @Injectable()
 export class AuthLogInterceptor implements NestInterceptor {
-  const;
   interceptorLogger = new Logger('AuthLogInterceptor');
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
