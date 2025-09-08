@@ -4,6 +4,7 @@ import * as process from 'node:process';
 dotenv.config();
 
 export const appConfig = {
+  production: process.env.NODE_ENV === 'production',
   secret: process.env.AUTH_SECRET || 'secret',
   cookieName: process.env.COOKIE_NAME || 'connect.sid',
   port: process.env.PORT || '3600',
