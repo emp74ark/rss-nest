@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { MongooseExceptionFilter } from './filters/mongoose-exception.filter';
 import { appConfig } from './config/dotenv';
@@ -13,10 +14,12 @@ async function bootstrap() {
   );
   const app = await NestFactory.create(AppModule, { logger });
 
+  const sessionTtl = 1000 * 60 * 60 * 24 * 7;
+
   const cookieOptions: CookieOptions = {
     httpOnly: appConfig.production,
     sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 24 * 7,
+    maxAge: sessionTtl,
   };
 
   logger.log(`Cookie options: ${JSON.stringify(cookieOptions)}`);
@@ -26,6 +29,12 @@ async function bootstrap() {
       secret: appConfig.secret,
       resave: false,
       saveUninitialized: false,
+      store: MongoStore.create({
+        mongoUrl: appConfig.db,
+        ttl: sessionTtl,
+        autoRemove: 'interval',
+        autoRemoveInterval: 10,
+      }),
       cookie: cookieOptions,
       name: appConfig.cookieName,
     }),
