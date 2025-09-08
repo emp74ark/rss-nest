@@ -15,7 +15,6 @@ async function bootstrap() {
 
   const cookieOptions: CookieOptions = {
     httpOnly: appConfig.production,
-    secure: appConfig.production,
     sameSite: 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 7,
   };
