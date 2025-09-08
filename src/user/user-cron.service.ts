@@ -6,7 +6,7 @@ import { UserService } from './user.service';
 export class UserCronService {
   constructor(private readonly userService: UserService) {}
 
-  @Cron('* * * * * 1')
+  @Cron('* * * 1 * *')
   async removeOrphanedUsers() {
     await this.userService.removeOrphaned();
   }
