@@ -10,7 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { Model, Types } from 'mongoose';
-import { Paginated, Pagination } from '../shared/entities';
+import { Paginated, Pagination, Role } from '../shared/entities';
 import { appConfig } from '../config/dotenv';
 import { Tag } from '../schemas/tags.schema';
 import { SourceFeed } from '../schemas/feed.schema';
@@ -98,7 +98,11 @@ export class UserService {
     return this.userModel.findById(id, { password: 0 });
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const current = await this.userModel.findById(id);
+    if (current?.role !== Role.Admin) {
+      Reflect.deleteProperty(updateUserDto, 'role');
+    }
     return this.userModel.findByIdAndUpdate(id, updateUserDto, {
       new: true,
       select: { password: 0 },
