@@ -1,0 +1,19 @@
+meta {
+  name: Get tags
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{backend}}/tag
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

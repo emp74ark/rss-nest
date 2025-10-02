@@ -1,0 +1,19 @@
+meta {
+  name: Log out
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{backend}}/auth/logout
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

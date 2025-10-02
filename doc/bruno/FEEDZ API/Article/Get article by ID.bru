@@ -1,0 +1,23 @@
+meta {
+  name: Get article by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{backend}}/article/:articleId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  articleId: 68baa0db4e018a9ce301bb91
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

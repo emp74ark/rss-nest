@@ -1,0 +1,19 @@
+meta {
+  name: Delete orphaned users
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{backend}}/user/orphaned
+  body: none
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Delete user
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{backend}}/user/:userId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  userId: 68bb1b8fa15ff53431efa5b9
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+}
