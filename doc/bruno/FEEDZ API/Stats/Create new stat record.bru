@@ -1,0 +1,24 @@
+meta {
+  name: Create new stat record
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{backend}}/stats/new?source=cv2&timestamp=1756923311850
+  body: none
+  auth: inherit
+}
+
+params:query {
+  source: cv2
+  timestamp: 1756923311850
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+}

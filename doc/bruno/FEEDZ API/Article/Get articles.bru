@@ -1,0 +1,27 @@
+meta {
+  name: Get articles
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{backend}}/article?pageNumber=1&perPage=2
+  body: none
+  auth: inherit
+}
+
+params:query {
+  pageNumber: 1
+  perPage: 2
+  ~tags: test,fav
+  ~read: true
+  ~dateSort: desc
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

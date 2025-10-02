@@ -1,0 +1,23 @@
+meta {
+  name: Delete tag
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{backend}}/tag/:tagName
+  body: none
+  auth: inherit
+}
+
+params:path {
+  tagName: tag2
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+}

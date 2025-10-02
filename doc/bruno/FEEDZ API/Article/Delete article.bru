@@ -1,0 +1,23 @@
+meta {
+  name: Delete article
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{backend}}/article/:articleId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  articleId: 68baa0db4e018a9ce301bb91
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Change article
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{backend}}/article/:articleId
+  body: json
+  auth: inherit
+}
+
+params:path {
+  articleId: 68baa0db4e018a9ce301bb91
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "tags": ["test"]
+  }
+}
+
+settings {
+  encodeUrl: true
+}

@@ -23,10 +23,10 @@ export class Article {
   @Prop({ required: true })
   pubDate: string;
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   content: string;
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   contentSnippet: string;
 
   @Prop({ required: true })

@@ -1,0 +1,25 @@
+meta {
+  name: Sign up
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{backend}}/auth/signup
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "password": "Tg3Z4CVQxsBcOO5x32trs6"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

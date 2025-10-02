@@ -1,0 +1,25 @@
+meta {
+  name: Create tag
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{backend}}/tag
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "test"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

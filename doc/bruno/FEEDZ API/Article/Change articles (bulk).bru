@@ -1,0 +1,29 @@
+meta {
+  name: Change articles (bulk)
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{backend}}/article
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "ids": [
+      "68528fa26951b435d79b720e",
+      "68528fa26951b435d79b720f"
+    ],
+    "read": false
+  }
+}
+
+settings {
+  encodeUrl: true
+}

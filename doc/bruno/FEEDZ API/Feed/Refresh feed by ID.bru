@@ -1,0 +1,23 @@
+meta {
+  name: Refresh feed by ID
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{backend}}/feed/:feedId/refresh
+  body: none
+  auth: inherit
+}
+
+params:path {
+  feedId: 68528fa26951b435d79b720d
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,31 @@
+meta {
+  name: Health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{backend}}/health
+  body: none
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+script:post-response {
+  test("Status code is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  const mockResponse = {
+    status: "active",
+    version: "0.0.3",
+    uptime: "0d 0h 32m 48s"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
