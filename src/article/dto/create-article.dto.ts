@@ -30,9 +30,11 @@ export class CreateArticleDto {
   pubDate: string;
 
   @IsString()
+  @IsOptional()
   content: string;
 
   @IsString()
+  @IsOptional()
   contentSnippet: string;
 
   @IsString()
