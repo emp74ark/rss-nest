@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ImATeapotException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Article } from '../schemas/article.schema';
 import { Paginated, Pagination, SortOrder } from '../shared/entities';
-import puppeteer from 'puppeteer';
+import puppeteer, { TimeoutError } from 'puppeteer';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
 
@@ -166,39 +170,62 @@ export class ArticleService {
     return this.articleModel.deleteMany({ feedId, userId });
   }
 
+  #containsCaptcha(html: string) {
+    return html.includes('captcha');
+  }
+
   async getFullText({ id, userId }: { id: string; userId: string }) {
-    const article = await this.articleModel.findOne({ _id: id, userId });
+    try {
+      const article = await this.articleModel.findOne({ _id: id, userId });
 
-    if (!article) {
-      throw new NotFoundException('Article does not exist');
+      if (!article) {
+        throw new NotFoundException('Article does not exist');
+      }
+
+      const link = article.link;
+
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        timeout: 3000,
+      });
+
+      const page = await browser.newPage();
+      await page.goto(link, {
+        timeout: 1000,
+        waitUntil: 'domcontentloaded',
+      });
+
+      const bodyHtml: string = await page.evaluate(
+        () => document.body.innerHTML,
+      );
+      const document: Document = new JSDOM(bodyHtml).window.document;
+      const read = new Readability(document).parse();
+      await browser.close();
+
+      if (!read?.content) {
+        if (this.#containsCaptcha(bodyHtml)) {
+          throw new NotFoundException(
+            'Could not fetch article content. Probably due to the captcha',
+          );
+        } else {
+          throw new NotFoundException('Could not fetch article content');
+        }
+      }
+
+      await this.articleModel.updateOne(
+        { _id: article._id },
+        { $set: { fullText: read.content } },
+      );
+
+      return { fullText: read?.content };
+    } catch (error) {
+      if (error instanceof TimeoutError) {
+        throw new ImATeapotException(
+          'To heavy process was triggered. Try again later',
+        );
+      }
+      throw error;
     }
-
-    const link = article.link;
-
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    const page = await browser.newPage();
-    await page.goto(link, {
-      waitUntil: 'domcontentloaded',
-    });
-
-    const bodyHtml: string = await page.evaluate(() => document.body.innerHTML);
-    const document: Document = new JSDOM(bodyHtml).window.document;
-    const read = new Readability(document).parse();
-    await browser.close();
-
-    if (!read?.content) {
-      throw new NotFoundException('Could not fetch article content');
-    }
-
-    await this.articleModel.updateOne(
-      { _id: article._id },
-      { $set: { fullText: read.content } },
-    );
-
-    return { fullText: read?.content };
   }
 }
