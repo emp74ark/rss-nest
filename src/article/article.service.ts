@@ -12,6 +12,7 @@ import { Paginated, Pagination, SortOrder } from '../shared/entities';
 import puppeteer, { TimeoutError } from 'puppeteer';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
+import { appConfig } from '../config/dotenv';
 
 @Injectable()
 export class ArticleService {
@@ -187,12 +188,12 @@ export class ArticleService {
       const browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        timeout: 30000,
+        timeout: appConfig.puppeteer.limit,
       });
 
       const page = await browser.newPage();
       await page.goto(link, {
-        timeout: 15000,
+        timeout: appConfig.puppeteer.limit,
         waitUntil: 'domcontentloaded',
       });
 

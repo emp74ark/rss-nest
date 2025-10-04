@@ -12,4 +12,7 @@ export const appConfig = {
   db: process.env.DB_HOST || 'mongodb://rss-db/rss',
   corsEnabled: process.env.CORS_ENABLED,
   orphanedUser: Number(process.env.ORPHANED_USER) || 2,
+  puppeteer: {
+    limit: Number(process.env.PUPPETEER_LIMIT), // 0 === disabled
+  },
 };
