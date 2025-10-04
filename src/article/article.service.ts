@@ -187,12 +187,12 @@ export class ArticleService {
       const browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        timeout: 10000,
+        timeout: 30000,
       });
 
       const page = await browser.newPage();
       await page.goto(link, {
-        timeout: 5000,
+        timeout: 15000,
         waitUntil: 'domcontentloaded',
       });
 
