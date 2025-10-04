@@ -9,7 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Article } from '../schemas/article.schema';
 import { Paginated, Pagination, SortOrder } from '../shared/entities';
-import puppeteer, { TimeoutError } from 'puppeteer';
+import puppeteer, { Browser, TimeoutError } from 'puppeteer';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
 import { appConfig } from '../config/dotenv';
@@ -176,6 +176,8 @@ export class ArticleService {
   }
 
   async getFullText({ id, userId }: { id: string; userId: string }) {
+    let browser: Browser | null = null;
+
     try {
       const article = await this.articleModel.findOne({ _id: id, userId });
 
@@ -185,7 +187,7 @@ export class ArticleService {
 
       const link = article.link;
 
-      const browser = await puppeteer.launch({
+      browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         timeout: appConfig.puppeteer.limit,
@@ -202,7 +204,6 @@ export class ArticleService {
       );
       const document: Document = new JSDOM(bodyHtml).window.document;
       const read = new Readability(document).parse();
-      await browser.close();
 
       if (!read?.content) {
         if (this.#containsCaptcha(bodyHtml)) {
@@ -227,6 +228,10 @@ export class ArticleService {
         );
       }
       throw error;
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
     }
   }
 }
