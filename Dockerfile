@@ -12,6 +12,7 @@ COPY package*.json .
 RUN npm install --prod
 COPY --from=builder /app/dist ./dist/
 COPY --from=builder /app/.env ./
+COPY --from=builder /app/proto ./proto
 EXPOSE 3600
 ENV NODE_ENV=production
 CMD ["node", "dist/main.js"]
