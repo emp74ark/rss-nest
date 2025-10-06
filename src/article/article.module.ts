@@ -3,12 +3,14 @@ import { ArticleService } from './article.service';
 import { ArticleController } from './article.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ArticleSchema } from '../schemas/article.schema';
+import { SharedModule } from '../shared/shared.module';
 
 @Module({
   controllers: [ArticleController],
   providers: [ArticleService],
   imports: [
     MongooseModule.forFeature([{ name: 'Article', schema: ArticleSchema }]),
+    SharedModule,
   ],
   exports: [ArticleService],
 })
