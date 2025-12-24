@@ -20,12 +20,15 @@ export class AuthService {
     const user = await this.userModel
       .findOne({ login: dto.login })
       .select('+password');
+
     if (!user) {
+      console.info('User not found');
       return null;
     }
 
     const isMatch = await argon.verify(user.password, dto.password);
     if (!isMatch) {
+      console.info('Incorrect password');
       return null;
     }
 
