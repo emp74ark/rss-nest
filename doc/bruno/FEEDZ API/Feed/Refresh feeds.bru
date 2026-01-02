@@ -1,0 +1,19 @@
+meta {
+  name: Refresh feeds
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{backend}}/feed/refresh
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

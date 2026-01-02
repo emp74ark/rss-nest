@@ -1,0 +1,29 @@
+meta {
+  name: Change tag
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{backend}}/tag/:tagName
+  body: json
+  auth: inherit
+}
+
+params:path {
+  tagName: test1
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "tag2"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

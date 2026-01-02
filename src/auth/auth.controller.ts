@@ -64,7 +64,7 @@ export class AuthController {
   logout(@Req() req: Request, @Res() res: Response) {
     req.session.destroy((err) => {
       if (err) {
-        throw InternalServerErrorException;
+        throw new InternalServerErrorException();
       }
     });
 

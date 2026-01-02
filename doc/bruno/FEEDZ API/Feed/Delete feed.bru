@@ -1,0 +1,23 @@
+meta {
+  name: Delete feed
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{backend}}/feed/:feedId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  feedId: 68528fa26951b435d79b720d
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+}

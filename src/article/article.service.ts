@@ -1,17 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ImATeapotException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Article } from '../schemas/article.schema';
 import { Paginated, Pagination, SortOrder } from '../shared/entities';
-import puppeteer from 'puppeteer';
-import { JSDOM } from 'jsdom';
-import { Readability } from '@mozilla/readability';
+import { CrawlerService } from '../shared/crawler.service';
+import { from, map, switchMap } from 'rxjs';
 
 @Injectable()
 export class ArticleService {
-  constructor(@InjectModel('Article') private articleModel: Model<Article>) {}
+  constructor(
+    @InjectModel('Article') private articleModel: Model<Article>,
+    private readonly crawlerService: CrawlerService,
+  ) {}
 
   create(createArticleDto: CreateArticleDto) {
     return this.articleModel.create(createArticleDto);
@@ -173,32 +179,34 @@ export class ArticleService {
       throw new NotFoundException('Article does not exist');
     }
 
-    const link = article.link;
+    const url = article.link;
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    const page = await browser.newPage();
-    await page.goto(link, {
-      waitUntil: 'domcontentloaded',
-    });
-
-    const bodyHtml: string = await page.evaluate(() => document.body.innerHTML);
-    const document: Document = new JSDOM(bodyHtml).window.document;
-    const read = new Readability(document).parse();
-    await browser.close();
-
-    if (!read?.content) {
-      throw new NotFoundException('Could not fetch article content');
-    }
-
-    await this.articleModel.updateOne(
-      { _id: article._id },
-      { $set: { fullText: read.content } },
+    return this.crawlerService.getDocument({ url }).pipe(
+      map(({ error, content: fullText, errorMessage }) => {
+        if (error) {
+          switch (errorMessage) {
+            case 'captcha':
+              throw new NotFoundException(
+                'Could not fetch article content. Probably due to the captcha',
+              );
+            case 'timeout':
+              throw new ImATeapotException(
+                'Process took too much time and was terminated. Try again later',
+              );
+            default:
+              throw new NotFoundException('Could not fetch article content');
+          }
+        }
+        return fullText;
+      }),
+      switchMap((fullText) => {
+        return from(
+          this.articleModel.updateOne(
+            { _id: article._id },
+            { $set: { fullText } },
+          ),
+        ).pipe(map(() => ({ fullText })));
+      }),
     );
-
-    return { fullText: read?.content };
   }
 }

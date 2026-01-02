@@ -1,0 +1,23 @@
+meta {
+  name: Get feed by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{backend}}/feed/:feedId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  feedId: 68528fa26951b435d79b720d
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

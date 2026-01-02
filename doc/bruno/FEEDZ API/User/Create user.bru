@@ -1,0 +1,27 @@
+meta {
+  name: Create user
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{backend}}/user
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "login": "user",
+    "password": "password",
+    "role": "admin"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

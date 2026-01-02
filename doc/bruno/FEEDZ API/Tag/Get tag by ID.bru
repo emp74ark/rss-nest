@@ -1,0 +1,23 @@
+meta {
+  name: Get tag by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{backend}}/tag/:tagName
+  body: none
+  auth: inherit
+}
+
+params:path {
+  tagName: tag2
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

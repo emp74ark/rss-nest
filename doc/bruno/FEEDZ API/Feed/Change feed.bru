@@ -1,0 +1,29 @@
+meta {
+  name: Change feed
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{backend}}/feed/:feedId
+  body: json
+  auth: inherit
+}
+
+params:path {
+  feedId: 68528fa26951b435d79b720d
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "description": "Test description"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Get user by ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{backend}}/user/:userId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  userId: 68bb1b8fa15ff53431efa5b9
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}

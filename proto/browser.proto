@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package browser_proto;
+
+service BrowserService {
+  rpc GetDocument (PageUrl) returns (PageDocument) {}
+}
+
+message PageUrl {
+  string url = 1;
+}
+
+message PageDocument {
+  string content = 1;
+}

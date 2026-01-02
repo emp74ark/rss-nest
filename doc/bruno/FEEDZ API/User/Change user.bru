@@ -1,0 +1,29 @@
+meta {
+  name: Change user
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{backend}}/user/:userId
+  body: json
+  auth: inherit
+}
+
+params:path {
+  userId: 68bb1b8fa15ff53431efa5b9
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "login": "second"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
