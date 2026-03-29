@@ -8,7 +8,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../schemas/user.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 import { Model, Types } from 'mongoose';
 import { Paginated, Pagination, Role } from '../shared/entities';
 import { appConfig } from '../config/dotenv';
@@ -16,6 +16,7 @@ import { Tag } from '../schemas/tags.schema';
 import { SourceFeed } from '../schemas/feed.schema';
 import * as argon from 'argon2';
 import { AuthResponseMessage } from '../auth/auth.enums';
+import { forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -109,64 +110,91 @@ export class UserService {
     });
   }
 
-  async removeUserData({ userIds }: { userIds: Types.ObjectId[] }) {
-    const deletedTags = await this.tagModel.deleteMany({
-      userId: { $in: userIds.map((el) => el._id.toHexString()) },
-    });
-
-    const deletedFeeds = await this.feedModel.deleteMany({
-      userId: { $in: userIds },
-    });
-
-    return {
-      deletedTags: deletedTags.deletedCount,
-      deletedFeeds: deletedFeeds.deletedCount,
-    };
+  removeUserData({
+    userIds,
+  }: {
+    userIds: Types.ObjectId[];
+  }): Observable<{ deletedTags: number; deletedFeeds: number }> {
+    return forkJoin({
+      deletedTags: from(this.tagModel.deleteMany({ userId: { $in: userIds } })),
+      deletedFeeds: from(
+        this.feedModel.deleteMany({ userId: { $in: userIds } }),
+      ),
+    }).pipe(
+      map(({ deletedTags, deletedFeeds }) => ({
+        deletedTags: deletedTags.deletedCount,
+        deletedFeeds: deletedFeeds.deletedCount,
+      })),
+    );
   }
 
-  async remove(id: string) {
-    const user = await this.userModel.findById(id);
+  remove(id: string): Observable<UserDocument | null> {
+    return from(this.userModel.findById(id)).pipe(
+      switchMap((user) => {
+        if (!user?._id) {
+          throw new BadRequestException('User not found');
+        }
 
-    if (!user?._id) {
-      throw new BadRequestException('User not found');
-    }
-
-    await this.removeUserData({ userIds: [user._id] });
-
-    return this.userModel.findByIdAndDelete(user?._id, {
-      select: { password: 0 },
-    });
+        return this.removeUserData({ userIds: [user._id] }).pipe(
+          switchMap(() =>
+            from(
+              this.userModel.findByIdAndDelete(user?._id, {
+                select: { password: 0 },
+              }),
+            ),
+          ),
+        );
+      }),
+    );
   }
 
-  async removeOrphaned() {
+  removeOrphaned(): Observable<{
+    deletedUsers: number;
+    deletedFeeds: number;
+    deletedTags: number;
+  }> {
     const today = new Date();
     const dateThreshold = new Date();
     dateThreshold.setMonth(today.getMonth() - appConfig.orphanedUser);
-    const orphanedUser = await this.userModel.find({
-      lastLogin: { $lt: dateThreshold },
-    });
 
-    const orphanedUserIds = orphanedUser.map((u) => u._id);
-    console.log('IDS', orphanedUserIds);
+    return from(
+      this.userModel.distinct('_id', {
+        lastLogin: { $lt: dateThreshold },
+      }),
+    ).pipe(
+      switchMap((orphanedUserIds: Types.ObjectId[]) => {
+        if (!orphanedUserIds.length) {
+          return of({
+            deletedUsers: 0,
+            deletedFeeds: 0,
+            deletedTags: 0,
+          });
+        }
 
-    const { deletedTags, deletedFeeds } = await this.removeUserData({
-      userIds: orphanedUserIds,
-    });
+        return forkJoin({
+          userDataDeletion: this.removeUserData({ userIds: orphanedUserIds }),
+          deletedUsers: from(
+            this.userModel.deleteMany({ _id: { $in: orphanedUserIds } }),
+          ),
+        }).pipe(
+          map(({ userDataDeletion, deletedUsers }) => {
+            const { deletedTags, deletedFeeds } = userDataDeletion;
+            if (deletedUsers.acknowledged) {
+              this.logger.warn(
+                `Removed ${
+                  deletedUsers.deletedCount
+                } users older than ${dateThreshold.toISOString()}. Removed related: ${deletedFeeds} feeds, ${deletedTags} tags.`,
+              );
+            }
 
-    const deletedUsers = await this.userModel.deleteMany({
-      _id: { $in: orphanedUserIds },
-    });
-
-    if (deletedUsers.acknowledged) {
-      this.logger.warn(
-        `Removed ${deletedUsers.deletedCount} users older than ${dateThreshold.toISOString()}. Removed related: ${deletedFeeds} feeds, ${deletedTags} tags.`,
-      );
-    }
-
-    return {
-      deletedUsers: deletedUsers.deletedCount,
-      deletedFeeds,
-      deletedTags,
-    };
+            return {
+              deletedUsers: deletedUsers.deletedCount,
+              deletedFeeds,
+              deletedTags,
+            };
+          }),
+        );
+      }),
+    );
   }
 }
