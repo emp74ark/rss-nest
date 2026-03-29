@@ -95,6 +95,17 @@ export class ArticleService {
       .exec();
   }
 
+  findAllGuidsByFeed({ userId, feedId }: { userId: string; feedId: string }) {
+    return this.articleModel
+      .find({
+        userId,
+        feedId,
+      })
+      .select('guid')
+      .lean()
+      .exec();
+  }
+
   findOne({ id, userId }: { id: string; userId: string }) {
     return this.articleModel.findOne({ _id: id, userId });
   }

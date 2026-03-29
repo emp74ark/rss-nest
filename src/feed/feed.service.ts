@@ -12,6 +12,15 @@ import { FeedParserService } from '../shared/feed-parser.service';
 import { ArticleService } from '../article/article.service';
 import { CreateArticleDto } from '../article/dto/create-article.dto';
 import { Paginated, Pagination } from '../shared/entities';
+import {
+  catchError,
+  from,
+  lastValueFrom,
+  map,
+  mergeMap,
+  of,
+  toArray,
+} from 'rxjs';
 
 @Injectable()
 export class FeedService {
@@ -134,7 +143,7 @@ export class FeedService {
       throw new BadRequestException('Feed is disabled');
     }
 
-    const existingArticles = await this.articleService.findAllByFeed({
+    const existingArticles = await this.articleService.findAllGuidsByFeed({
       userId,
       feedId: feedId,
     });
@@ -171,18 +180,18 @@ export class FeedService {
       settings: { enabled: true },
     });
 
-    const promises = feeds.map((s) => {
-      return this.refreshOne({ userId, feedId: s._id.toHexString() });
-    });
-
-    const result = await Promise.allSettled(promises);
-
-    return result
-      .map((r) => {
-        if (r.status === 'fulfilled') {
-          return r.value;
-        }
-      })
-      .filter(Boolean);
+    return lastValueFrom(
+      from(feeds).pipe(
+        mergeMap(
+          (s) =>
+            from(this.refreshOne({ userId, feedId: s._id.toHexString() })).pipe(
+              catchError(() => of(null)),
+            ),
+          3,
+        ),
+        toArray(),
+        map((res) => res.filter(Boolean)),
+      ),
+    );
   }
 }

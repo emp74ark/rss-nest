@@ -54,6 +54,7 @@ export class FeedParserService {
       throw new NotFoundException('Feed not found');
     }
     const parsedFeed = await this.parseRssFeed({ link });
-    return parsedFeed?.filter(({ guid }) => !guids.includes(guid));
+    const existingGuids = new Set(guids);
+    return parsedFeed?.filter(({ guid }) => !existingGuids.has(guid));
   };
 }
