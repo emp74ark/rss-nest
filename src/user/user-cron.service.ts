@@ -8,7 +8,6 @@ export class UserCronService {
 
   @Cron('* * * 1 * *')
   async removeOrphanedUsers() {
-    // temporarily disabled
-    // await this.userService.removeOrphaned();
+    await this.userService.removeOrphaned();
   }
 }
