@@ -52,7 +52,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new MongooseExceptionFilter());
 
-  const origins = [appConfig.webClient];
+  const origins = [appConfig.webClient, appConfig.corsEnabled].filter(Boolean);
 
   app.enableCors({
     origin: origins,
