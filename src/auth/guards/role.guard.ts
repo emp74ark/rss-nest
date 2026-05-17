@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { Role } from '../../shared/entities';
 import { RequiredRole } from '../decorators';
+import { RequestWithSession } from '../../shared/entities/session.types';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -11,7 +12,7 @@ export class RoleGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const { session } = context.switchToHttp().getRequest<any>();
+    const { session } = context.switchToHttp().getRequest<RequestWithSession>();
     const user = session?.user;
 
     const requiredRole = this.reflect?.getAllAndOverride<Role>(RequiredRole, [

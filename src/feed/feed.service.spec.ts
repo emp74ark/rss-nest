@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FeedService } from './feed.service';
 import { getModelToken } from '@nestjs/mongoose';
 import {
-  mockModelFactory,
   MockModel,
+  mockModelFactory,
   mockQueryFactory,
 } from '../test-utils/mongoose-mock-factory';
 import { ArticleService } from '../article/article.service';

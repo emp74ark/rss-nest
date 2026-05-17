@@ -17,6 +17,7 @@ import { AuthLogInDto, AuthSignUpDto } from './dto';
 import { SessionGuard } from './guards';
 import { AuthLogInterceptor } from './interceptors/auth-log.interceptor';
 import { AuthResponseMessage } from './auth.enums';
+import { RequestWithSession } from '../shared/entities/session.types';
 
 @Controller('auth')
 export class AuthController {
@@ -59,7 +60,7 @@ export class AuthController {
 
   @Get('logout')
   @UseGuards(SessionGuard)
-  async logout(@Req() req: any) {
+  async logout(@Req() req: RequestWithSession) {
     await new Promise<void>((resolve, reject) => {
       req.session.destroy((err: Error) => {
         if (err) {

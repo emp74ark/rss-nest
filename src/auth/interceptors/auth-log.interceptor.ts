@@ -7,6 +7,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { catchError, Observable, throwError } from 'rxjs';
+import { RequestWithSession } from '../../shared/entities/session.types';
 
 @Injectable()
 export class AuthLogInterceptor implements NestInterceptor {
@@ -14,7 +15,7 @@ export class AuthLogInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
-    const req = ctx.getRequest<any>();
+    const req = ctx.getRequest<RequestWithSession>();
     return next.handle().pipe(
       catchError((error: unknown) => {
         if (error instanceof HttpException) {

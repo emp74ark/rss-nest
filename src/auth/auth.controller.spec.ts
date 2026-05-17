@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { AuthResponseMessage } from './auth.enums';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -70,22 +71,17 @@ describe('AuthController', () => {
   });
 
   describe('logout', () => {
-    it('should destroy session and clear cookie', () => {
+    it('should destroy session and return success message', async () => {
       const req = {
         session: {
           destroy: jest.fn((cb) => cb(null)),
         },
       } as any;
-      const res = {
-        clearCookie: jest.fn().mockReturnThis(),
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis(),
-      } as any;
 
-      controller.logout(req, res);
+      const result = await controller.logout(req);
 
       expect(req.session.destroy).toHaveBeenCalled();
-      expect(res.clearCookie).toHaveBeenCalledWith('connect.sid');
+      expect(result).toEqual({ message: AuthResponseMessage.LOGGED_OUT });
     });
   });
 });

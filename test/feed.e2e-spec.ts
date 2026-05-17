@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import { getModelToken } from '@nestjs/mongoose';
 import {
   FastifyAdapter,
@@ -16,7 +15,7 @@ import {
   MockModel,
   mockModelFactory,
   mockQueryFactory,
-} from './../src/test-utils/mongoose-mock-factory';
+} from '../src/test-utils/mongoose-mock-factory';
 
 jest.mock('argon2');
 

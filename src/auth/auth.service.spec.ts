@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { getModelToken } from '@nestjs/mongoose';
 import {
-  mockModelFactory,
   MockModel,
+  mockModelFactory,
   mockQueryFactory,
 } from '../test-utils/mongoose-mock-factory';
 import * as argon from 'argon2';

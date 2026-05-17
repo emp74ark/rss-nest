@@ -2,14 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ArticleService } from './article.service';
 import { getModelToken } from '@nestjs/mongoose';
 import {
-  mockModelFactory,
   MockModel,
+  mockModelFactory,
 } from '../test-utils/mongoose-mock-factory';
 
 import { CrawlerService } from '../shared/crawler.service';
-import { of, lastValueFrom } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { SortOrder } from '../shared/entities';
 import { CreateArticleDto } from './dto/create-article.dto';
+
 describe('ArticleService', () => {
   let service: ArticleService;
   let articleModel: MockModel;
