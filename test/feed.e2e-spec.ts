@@ -1,9 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import { getModelToken } from '@nestjs/mongoose';
-import session from 'express-session';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import fastifyCookie from '@fastify/cookie';
+import fastifySession from '@fastify/session';
 import { FeedParserService } from '../src/shared/feed-parser.service';
 import { ArticleService } from '../src/article/article.service';
 import * as argon from 'argon2';
@@ -11,12 +15,12 @@ import {
   MockModel,
   mockModelFactory,
   mockQueryFactory,
-} from './../src/test-utils/mongoose-mock-factory';
+} from '../src/test-utils/mongoose-mock-factory';
 
 jest.mock('argon2');
 
 describe('Feed (e2e)', () => {
-  let app: INestApplication;
+  let app: NestFastifyApplication;
   let feedModel: MockModel;
   let userModel: MockModel;
   let articleService: ArticleService;
@@ -34,19 +38,23 @@ describe('Feed (e2e)', () => {
       .useValue(mockModelFactory())
       .compile();
 
-    app = moduleFixture.createNestApplication();
-    app.use(
-      session({
-        secret: 'test',
-        resave: false,
-        saveUninitialized: false,
-      }),
+    app = moduleFixture.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
     );
+
+    await app.register(fastifyCookie);
+    await app.register(fastifySession, {
+      secret: 'test-secret-that-is-at-least-32-characters-long',
+      saveUninitialized: false,
+      cookie: { secure: false },
+    });
+
     feedModel = moduleFixture.get(getModelToken('Feed'));
     userModel = moduleFixture.get(getModelToken('User'));
     articleService = moduleFixture.get(ArticleService);
     feedParserService = moduleFixture.get(FeedParserService);
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
   });
 
   afterAll(async () => {

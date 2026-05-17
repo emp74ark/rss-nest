@@ -6,8 +6,8 @@ import { Role } from '../shared/entities';
 import { BadRequestException, ImATeapotException } from '@nestjs/common';
 import { Types } from 'mongoose';
 import {
-  mockModelFactory,
   MockModel,
+  mockModelFactory,
 } from '../test-utils/mongoose-mock-factory';
 
 jest.mock('argon2');

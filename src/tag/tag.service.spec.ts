@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TagService } from './tag.service';
 import { getModelToken } from '@nestjs/mongoose';
 import {
-  mockModelFactory,
   MockModel,
+  mockModelFactory,
 } from '../test-utils/mongoose-mock-factory';
 import { ConflictException } from '@nestjs/common';
 

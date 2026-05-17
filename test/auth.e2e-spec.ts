@@ -1,20 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import { getModelToken } from '@nestjs/mongoose';
-import session from 'express-session';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import fastifyCookie from '@fastify/cookie';
+import fastifySession from '@fastify/session';
 import {
   MockModel,
   mockModelFactory,
   mockQueryFactory,
-} from './../src/test-utils/mongoose-mock-factory';
+} from '../src/test-utils/mongoose-mock-factory';
 import * as argon from 'argon2';
+import { AuthResponseMessage } from '../src/auth/auth.enums';
 
 jest.mock('argon2');
 
 describe('Auth (e2e)', () => {
-  let app: INestApplication;
+  let app: NestFastifyApplication;
   let userModel: MockModel;
 
   beforeAll(async () => {
@@ -25,16 +30,20 @@ describe('Auth (e2e)', () => {
       .useValue(mockModelFactory())
       .compile();
 
-    app = moduleFixture.createNestApplication();
-    app.use(
-      session({
-        secret: 'test',
-        resave: false,
-        saveUninitialized: false,
-      }),
+    app = moduleFixture.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
     );
+
+    await app.register(fastifyCookie);
+    await app.register(fastifySession, {
+      secret: 'test-secret-that-is-at-least-32-characters-long',
+      saveUninitialized: false,
+      cookie: { secure: false },
+    });
+
     userModel = moduleFixture.get(getModelToken('User'));
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
   });
 
   afterAll(async () => {
@@ -122,6 +131,39 @@ describe('Auth (e2e)', () => {
         .expect((res) => {
           expect(res.body['login']).toBe('testuser');
         });
+    });
+
+    it('should logout successfully', async () => {
+      const mockUser = {
+        _id: '123',
+        login: 'testuser',
+        toObject: jest
+          .fn()
+          .mockReturnValue({ login: 'testuser', role: 'user' }),
+      };
+
+      const query = mockQueryFactory();
+      query.exec.mockResolvedValue(mockUser);
+
+      userModel.findOne!.mockReturnValue(query);
+      userModel.findByIdAndUpdate!.mockResolvedValue(mockUser);
+      userModel.findById!.mockReturnValue(query);
+      (argon.verify as jest.Mock).mockResolvedValue(true);
+
+      const agent = request.agent(app.getHttpServer());
+      await agent
+        .post('/auth/login')
+        .send({ login: 'testuser', password: 'password123' })
+        .expect(200);
+
+      await agent
+        .get('/auth/logout')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body['message']).toBe(AuthResponseMessage.LOGGED_OUT);
+        });
+
+      await agent.get('/user/self').expect(403); // Assuming SessionGuard throws Forbidden or similar when session is gone
     });
   });
 });

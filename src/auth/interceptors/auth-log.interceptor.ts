@@ -7,7 +7,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { catchError, Observable, throwError } from 'rxjs';
-import { Request } from 'express';
+import { RequestWithSession } from '../../shared/entities';
 
 @Injectable()
 export class AuthLogInterceptor implements NestInterceptor {
@@ -15,12 +15,12 @@ export class AuthLogInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
-    const req: Request = ctx.getRequest();
+    const req = ctx.getRequest<RequestWithSession>();
     return next.handle().pipe(
       catchError((error: unknown) => {
         if (error instanceof HttpException) {
           this.interceptorLogger.warn(
-            `Unauthorized request from ${req.ip} for ${req.originalUrl}`,
+            `Unauthorized request from ${req.ip} for ${req.url || req.originalUrl}`,
           );
         } else {
           this.interceptorLogger.error(error);

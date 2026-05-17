@@ -1,44 +1,47 @@
 import { NestFactory } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
-import session from 'express-session';
+import fastifyCookie from '@fastify/cookie';
+import fastifySession from '@fastify/session';
 import MongoStore from 'connect-mongo';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { MongooseExceptionFilter } from './filters/mongoose-exception.filter';
 import { appConfig } from './config/dotenv';
-import { CookieOptions } from 'express';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   logger.log(
-    `Starting application in ${appConfig.production ? 'production' : 'development'} mode`,
+    `Starting application with Fastify in ${appConfig.production ? 'production' : 'development'} mode`,
   );
-  const app = await NestFactory.create(AppModule, { logger });
 
-  const sessionTtl = 1000 * 60 * 60 * 24 * 7;
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+    { logger },
+  );
 
-  const cookieOptions: CookieOptions = {
-    httpOnly: appConfig.production,
-    sameSite: 'lax',
-    maxAge: sessionTtl,
-  };
+  const sessionTtl = 1000 * 60 * 60 * 24 * 7; // 7 days in ms
 
-  logger.log(`Cookie options: ${JSON.stringify(cookieOptions)}`);
-
-  app.use(
-    session({
-      secret: appConfig.secret,
-      resave: false,
-      saveUninitialized: false,
-      store: MongoStore.create({
-        mongoUrl: appConfig.db,
-        ttl: sessionTtl,
-        autoRemove: 'interval',
-        autoRemoveInterval: 10,
-      }),
-      cookie: cookieOptions,
-      name: appConfig.cookieName,
+  await app.register(fastifyCookie);
+  await app.register(fastifySession, {
+    secret: appConfig.secret,
+    store: MongoStore.create({
+      mongoUrl: appConfig.db,
+      ttl: sessionTtl / 1000, // connect-mongo expects seconds
+      autoRemove: 'interval',
+      autoRemoveInterval: 10,
     }),
-  );
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: sessionTtl,
+      secure: appConfig.production,
+    },
+    saveUninitialized: false,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -58,7 +61,7 @@ async function bootstrap() {
 
   logger.log(`Whitelist origins: ${origins.join(', ')}`);
 
-  await app.listen(appConfig.port);
+  await app.listen(appConfig.port, '0.0.0.0');
 }
 
 void bootstrap();

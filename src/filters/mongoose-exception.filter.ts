@@ -5,7 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { MongoServerError } from 'mongodb';
-import { Response } from 'express';
+import { FastifyLikeResponse } from '../shared/entities';
 
 enum MongoErrorCode {
   DUPLICATE_KEY = 11000,
@@ -15,9 +15,9 @@ enum MongoErrorCode {
 export class MongooseExceptionFilter implements ExceptionFilter {
   catch(exception: MongoServerError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response: Response = ctx.getResponse();
+    const response = ctx.getResponse<FastifyLikeResponse>();
     if (exception.code === MongoErrorCode.DUPLICATE_KEY) {
-      response.status(HttpStatus.CONFLICT).json({
+      void response.status(HttpStatus.CONFLICT).send({
         message: 'Duplicate key',
         error: 'Conflict',
         statusCode: HttpStatus.CONFLICT,

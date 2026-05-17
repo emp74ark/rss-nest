@@ -7,18 +7,17 @@ import {
   InternalServerErrorException,
   Post,
   Req,
-  Res,
   Session,
   UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthLogInDto, AuthSignUpDto } from './dto';
 import { SessionGuard } from './guards';
 import { AuthLogInterceptor } from './interceptors/auth-log.interceptor';
 import { AuthResponseMessage } from './auth.enums';
+import { RequestWithSession } from '../shared/entities';
 
 @Controller('auth')
 export class AuthController {
@@ -61,16 +60,16 @@ export class AuthController {
 
   @Get('logout')
   @UseGuards(SessionGuard)
-  logout(@Req() req: Request, @Res() res: Response) {
-    req.session.destroy((err) => {
-      if (err) {
-        throw new InternalServerErrorException();
-      }
+  async logout(@Req() req: RequestWithSession) {
+    await new Promise<void>((resolve, reject) => {
+      req.session.destroy((err: Error) => {
+        if (err) {
+          reject(new InternalServerErrorException());
+        }
+        resolve();
+      });
     });
 
-    return res
-      .clearCookie('connect.sid')
-      .status(HttpStatus.OK)
-      .json({ message: AuthResponseMessage.LOGGED_OUT });
+    return { message: AuthResponseMessage.LOGGED_OUT };
   }
 }
