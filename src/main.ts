@@ -25,6 +25,16 @@ async function bootstrap() {
 
   const sessionTtl = 1000 * 60 * 60 * 24 * 7; // 7 days in ms
 
+  const origins = [appConfig.webClient, appConfig.corsEnabled].filter(Boolean);
+
+  app.enableCors({
+    origin: origins,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  });
+
+  logger.log(`Whitelist origins: ${origins.join(', ')}`);
+
   await app.register(fastifyCookie);
   await app.register(fastifySession, {
     secret: appConfig.secret,
@@ -52,14 +62,6 @@ async function bootstrap() {
 
   app.useGlobalFilters(new MongooseExceptionFilter());
 
-  const origins = [appConfig.webClient, appConfig.corsEnabled].filter(Boolean);
-
-  app.enableCors({
-    origin: origins,
-    credentials: true,
-  });
-
-  logger.log(`Whitelist origins: ${origins.join(', ')}`);
 
   await app.listen(appConfig.port, '0.0.0.0');
 }
