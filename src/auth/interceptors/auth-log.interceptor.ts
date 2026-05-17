@@ -7,7 +7,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { catchError, Observable, throwError } from 'rxjs';
-import { RequestWithSession } from '../../shared/entities/session.types';
+import { RequestWithSession } from '../../shared/entities';
 
 @Injectable()
 export class AuthLogInterceptor implements NestInterceptor {

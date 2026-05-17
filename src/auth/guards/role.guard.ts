@@ -1,9 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { Role } from '../../shared/entities';
+import { RequestWithSession, Role } from '../../shared/entities';
 import { RequiredRole } from '../decorators';
-import { RequestWithSession } from '../../shared/entities/session.types';
 
 @Injectable()
 export class RoleGuard implements CanActivate {

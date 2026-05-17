@@ -17,7 +17,7 @@ import { AuthLogInDto, AuthSignUpDto } from './dto';
 import { SessionGuard } from './guards';
 import { AuthLogInterceptor } from './interceptors/auth-log.interceptor';
 import { AuthResponseMessage } from './auth.enums';
-import { RequestWithSession } from '../shared/entities/session.types';
+import { RequestWithSession } from '../shared/entities';
 
 @Controller('auth')
 export class AuthController {

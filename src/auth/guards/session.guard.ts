@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { RequestWithSession } from '../../shared/entities/session.types';
+import { RequestWithSession } from '../../shared/entities';
 
 @Injectable()
 export class SessionGuard implements CanActivate {

@@ -5,7 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { MongoServerError } from 'mongodb';
-import { FastifyLikeResponse } from '../shared/entities/session.types';
+import { FastifyLikeResponse } from '../shared/entities';
 
 enum MongoErrorCode {
   DUPLICATE_KEY = 11000,
