@@ -19,7 +19,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({ trustProxy: true }),
     { logger },
   );
 
@@ -46,7 +46,7 @@ async function bootstrap() {
     }),
     cookie: {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: appConfig.production ? 'none' : 'lax',
       maxAge: sessionTtl,
       secure: appConfig.production,
     },
