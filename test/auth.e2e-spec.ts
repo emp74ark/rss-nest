@@ -15,6 +15,7 @@ import {
   mockQueryFactory,
 } from './../src/test-utils/mongoose-mock-factory';
 import * as argon from 'argon2';
+import { AuthResponseMessage } from './../src/auth/auth.enums';
 
 jest.mock('argon2');
 
@@ -131,6 +132,39 @@ describe('Auth (e2e)', () => {
         .expect((res) => {
           expect(res.body['login']).toBe('testuser');
         });
+    });
+
+    it('should logout successfully', async () => {
+      const mockUser = {
+        _id: '123',
+        login: 'testuser',
+        toObject: jest
+          .fn()
+          .mockReturnValue({ login: 'testuser', role: 'user' }),
+      };
+
+      const query = mockQueryFactory();
+      query.exec.mockResolvedValue(mockUser);
+
+      userModel.findOne!.mockReturnValue(query);
+      userModel.findByIdAndUpdate!.mockResolvedValue(mockUser);
+      userModel.findById!.mockReturnValue(query);
+      (argon.verify as jest.Mock).mockResolvedValue(true);
+
+      const agent = request.agent(app.getHttpServer());
+      await agent
+        .post('/auth/login')
+        .send({ login: 'testuser', password: 'password123' })
+        .expect(200);
+
+      await agent
+        .get('/auth/logout')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body['message']).toBe(AuthResponseMessage.LOGGED_OUT);
+        });
+
+      await agent.get('/user/self').expect(403); // Assuming SessionGuard throws Forbidden or similar when session is gone
     });
   });
 });
